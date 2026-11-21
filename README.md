@@ -1,4 +1,4 @@
-# Company Brain
+# BrightLoop
 
 **A linter for company decisions.**
 
