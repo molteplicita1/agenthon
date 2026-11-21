@@ -1,0 +1,19 @@
+[project]
+name = "company-brain-backend"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.165.0",
+    "google-genai>=3.6.1",
+    "httpx>=0.28.1",
+    "python-dotenv>=1.2.4",
+    "uvicorn>=0.54.0",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
