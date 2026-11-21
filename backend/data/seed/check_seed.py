@@ -137,7 +137,7 @@ need(S("src_chat_pg").get("timestamp") == "2026-11-23T10:15:00" and S("src_chat_
 need(mem.get("mem_pg", {}).get("status") == "proposed" and mem["mem_pg"]["visible_to"] == ["tech"], "mem_pg proposed, tech only")
 need(S("src_chat_azure").get("timestamp") == "2026-11-23T13:30:00" and S("src_chat_azure").get("title") == "#random"
      and S("src_chat_azure").get("visible_to") == ["all"] and S("src_chat_azure").get("team") == "tech", "src_chat_azure")
-need(mem.get("mem_azure", {}).get("status") == "proposed" and mem["mem_azure"]["visible_to"] == ["all"], "mem_azure proposed, all")
+need("mem_azure" not in mem, "mem_azure is out of the seed (CONTRACT section 18)")
 need("€84,000" in S("src_doc_contract").get("body", "") and S("src_doc_contract").get("visible_to") == ["finance"]
      and S("src_doc_contract").get("team") == "finance", "src_doc_contract")
 need(mem.get("mem_contract", {}).get("status") == "approved" and mem["mem_contract"]["decided_by"] == "luca"
@@ -157,8 +157,8 @@ pend = {p: [a["id"] for a in actions if a["for_user"] == p and a["status"] == "p
 prop = {p["id"]: [m["id"] for m in memory if m["status"] == "proposed" and m["team"] == p["team"]] for p in people if p["is_lead"]}
 for p in got:
     if not pend[p] and not prop.get(p): err(f"{p}: nothing waiting for their morning brief")
-if sorted(pend["giulia"] + prop["giulia"]) != ["act_golive", "act_key", "mem_azure", "mem_pg"]:
-    err("giulia's brief must hold exactly act_golive, act_key, mem_pg, mem_azure")
+if sorted(pend["giulia"] + prop["giulia"]) != ["act_golive", "act_key", "mem_pg"]:
+    err("giulia must have exactly act_golive, act_key, mem_pg waiting")
 
 # ---- DEMO traps (D2): where each keyword may appear
 text = lambda x: json.dumps(x, ensure_ascii=False).lower()
@@ -168,8 +168,8 @@ def only_in(word, allowed, pools):
 everything = [sources, incoming, memory, actions]
 only_in("mongo", ["src_chat_pg", "src_pr_mongo", "mem_pg"], everything)          # mem_pg is pinned by the contract
 only_in("postgres", ["src_chat_pg", "mem_pg"], everything)
-only_in("azure", ["src_chat_azure", "mem_azure"], everything)
-only_in("aws", ["src_chat_azure", "mem_azure"], everything)
+only_in("azure", ["src_chat_azure"], everything)
+only_in("aws", ["src_chat_azure"], everything)
 only_in("84,000", ["src_doc_contract", "mem_contract"], everything)
 only_in("staging", ["src_chat_key", "act_key"], everything)
 only_in("api key", ["src_chat_key", "act_key"], everything)

@@ -17,3 +17,4 @@ D2 result (checked by hand and by check_seed.py): no parental leave text anywher
 Contract reading: some sources are visible to ["sales","finance"] (pricing sheet and its two memory items, task_pricing_2027), which the contract allows because the list contains the owning team.
 D3 done: backend/data/seed/check_seed.py (run: python3 backend/data/seed/check_seed.py) checks section 10 rules 1-6, the pinned ids of section 9, the source counts, who sees what in each brief, and the DEMO traps. It prints SEED OK.
 SEED FULL READY
+- (by the bot agent, human's request) Change set 5: mem_azure removed from memory.json; check_seed.py no longer pins it and the azure/aws keyword lists now allow only src_chat_azure. SEED OK.

@@ -17,3 +17,4 @@ F4 & F5 done — added `Next: <next_step>` / `No more steps` under Simulate inco
   `/demo/next-event?track=…`. Overview types: `next_step` and `remaining_events` per track.
   Mock data updated to match.
 - Verified: `tsc --noEmit` and `npm run build` pass. Not yet looked at in the browser.
+- (by the bot agent, human's request) Change set 5: `TRACKS` in src/types.ts holds only the tech button; "Simulate finance event" removed. `tsc --noEmit` passes.

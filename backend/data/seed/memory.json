@@ -36,24 +36,6 @@
     "decided_at": null
   },
   {
-    "id": "mem_azure",
-    "statement": "Brightloop will migrate from AWS to Azure in 2027.",
-    "team": "tech",
-    "visible_to": [
-      "all"
-    ],
-    "status": "proposed",
-    "cites": [
-      {
-        "source_id": "src_chat_azure",
-        "quote": "the company will move from AWS to Azure next year"
-      }
-    ],
-    "created_at": "2026-11-23T13:40:00",
-    "decided_by": null,
-    "decided_at": null
-  },
-  {
     "id": "mem_contract",
     "statement": "The Alpilog contract for 2026 is worth €84,000, invoiced in three milestones.",
     "team": "finance",

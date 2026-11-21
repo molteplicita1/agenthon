@@ -4,7 +4,5 @@
     {"step": "release", "id": "mem_pg"},
     {"step": "source", "id": "src_pr_mongo"}
   ],
-  "finance": [
-    {"step": "release", "id": "act_kestrel"}
-  ]
+  "finance": []
 }

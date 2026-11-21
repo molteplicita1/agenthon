@@ -63,9 +63,9 @@ def to_watcher(c, approve_pg=True):
 def test_script_order_and_next_step(c, fake):
     fake(conflict_memory_id=None, conflict_quote=None, alert_text=None, message_to_author=None, facts=[])
     o = c.get("/demo/overview").json()
-    assert o["remaining_events"] == {"tech": 3, "finance": 1} and o["last_event"] is None
+    assert o["remaining_events"] == {"tech": 3, "finance": 0} and o["last_event"] is None
     assert o["next_step"]["tech"] == "Action for Giulia Ferri: Move 'Alpilog – API migration' to 2 Dec and notify #tech"
-    assert o["next_step"]["finance"] == "Action for Luca Moretti: Send the first payment reminder to Kestrel Freight"
+    assert o["next_step"]["finance"] is None  # finance track left out of the pitch (section 18)
     r = press(c)
     assert r["event"]["id"] == "src_email_golive" and r["remaining"] == 2
     alert = c.get("/state", headers=H("giulia")).json()["thread"][-1]
@@ -78,12 +78,9 @@ def test_script_order_and_next_step(c, fake):
     assert c.get("/demo/overview").json()["next_step"]["tech"] == \
         "New pull request by Marco Riva: Add MongoDB store for Alpilog reports"
     press(c)
-    r = press(c, track="finance")
-    assert r["event"]["id"] == "src_chat_kestrel" and r["remaining"] == 0
     whom = {pid: [x["id"] for m in c.get("/state", headers=H(pid)).json()["thread"][1:]
                   for x in m["actions"] + m["memory_items"]] for pid in ("giulia", "marco", "luca", "sara")}
-    assert whom == {"giulia": ["act_golive", "mem_pg"], "marco": [],
-                    "luca": ["act_kestrel"], "sara": []}
+    assert whom == {"giulia": ["act_golive", "mem_pg"], "marco": [], "luca": [], "sara": []}
     o = c.get("/demo/overview").json()
     assert o["remaining_events"] == {"tech": 0, "finance": 0} and o["next_step"] == {"tech": None, "finance": None}
     assert press(c) == {"event": None, "remaining": 0}
@@ -119,7 +116,7 @@ def test_watcher_uses_model_text_and_marks_caught(c, fake):
     assert act["effects"][0]["text"].startswith("Hi Marco")
     mem = {m["id"]: m for m in c.get("/demo/overview").json()["memory"]}
     assert mem["mem_pg"]["caught"] == ["Pull request · Add MongoDB store for Alpilog reports · Tue 24 Nov 09:00"]
-    assert len(mem) == 18  # facts are discarded when there is a conflict
+    assert len(mem) == 17  # facts are discarded when there is a conflict
     assert c.post(f"/actions/{act['id']}/approve", headers=H("marco")).status_code == 403
     assert c.post(f"/actions/{act['id']}/approve", headers=H("giulia")).status_code == 200
     out = c.get("/demo/overview").json()["outbox"]

@@ -598,3 +598,13 @@ Where this section and an older part of this file or a task list disagree, this 
 | Telegram | Every start of the bot is a new demo: it drops updates sent while it was off and deletes from each chat the messages of the last run (its own and the person's; it keeps their ids in `bot/bot_state.json`). Ties are kept. Telegram deletes only messages younger than 48 h. | bot |
 | Brief | Repeats nothing an alert brings later. It holds no pending actions and no memory proposals (each arrives as its own alert), and no approved fact whose sources are cited by any item of `demo_script.json`. With nothing left (the case for every person in the seed) the text is: `Good morning, <first name>. Nothing needs you right now. I will message you as soon as something does.` No citations. Voice as usual. Replaces the "Content" and "mentions what is waiting" lines of section 11. | backend |
 | Demo steps | Tech track is `act_golive`, `mem_pg`, `src_pr_mongo` (3 presses). `mem_azure` and `act_key` left the script, not the seed. DEMO.md has 14 steps. | backend |
+
+## 18. Change set 5 (the 9-step pitch of DEMO.md)
+
+Where this section and an older part of this file or a task list disagree, this section wins.
+
+| Area | Change | Who |
+|---|---|---|
+| Demo steps | The finance track of `demo_script.json` is empty: the Kestrel Freight action (`act_kestrel`) is no longer released. It stays in the seed. The track still exists in the overview (`remaining_events.finance` = 0, `next_step.finance` = null). | backend |
+| Seed | `mem_azure` is removed from `memory.json` (section 9 no longer pins it); `src_chat_azure` stays. `check_seed.py` updated. | data |
+| Web page | Only one demo button: `Simulate tech event`. The `Simulate finance event` button is gone. | frontend |

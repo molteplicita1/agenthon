@@ -80,11 +80,11 @@ export interface Overview {
   next_step: Record<Track, string | null>;
 }
 
-/** The two demo buttons: one script for the Tech Lead, one for the Finance Manager. */
+/** The demo tracks of the backend. Only the tech one has a button: the finance track is empty
+ *  and left out of the 3-minute pitch (CONTRACT section 18). */
 export type Track = "tech" | "finance";
 export const TRACKS: Array<{ id: Track; label: string }> = [
   { id: "tech", label: "Simulate tech event" },
-  { id: "finance", label: "Simulate finance event" },
 ];
 
 export interface NextEventResponse {
