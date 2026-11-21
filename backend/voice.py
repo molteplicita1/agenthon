@@ -19,6 +19,8 @@ def speak(text: str) -> bytes:
     path = CACHE / f"{hashlib.sha256(text.encode()).hexdigest()[:24]}.mp3"
     if path.exists():
         return path.read_bytes()
+    if os.environ.get("BRAIN_NO_VOICE") == "1":
+        raise VoiceError("voice disabled (BRAIN_NO_VOICE=1)")
     key, voice = os.environ.get("ELEVENLABS_API_KEY"), os.environ.get("ELEVENLABS_VOICE_ID")
     if not key or not voice:
         raise VoiceError("ELEVENLABS_API_KEY or ELEVENLABS_VOICE_ID is not set")

@@ -85,34 +85,38 @@
   },
   {
     "id": "act_kestrel",
-    "title": "Ask Sara to nudge Kestrel Freight and plan the formal reminder",
-    "reason": "Kestrel Freight invoice 2026-031 is over a week late and they had promised payment by 16 Nov.",
+    "title": "Send the first payment reminder to Kestrel Freight",
+    "reason": "Kestrel Freight has not paid invoice 2026-031 yet. They promised payment by 16 Nov, so it is now 8 days late, and the first reminder is due 7 days after the due date.",
     "for_user": "luca",
     "status": "pending",
     "effects": [
       {
         "type": "send_message",
-        "to": "sara",
-        "text": "Kestrel Freight invoice 2026-031 is over a week late. Could you nudge Martina before I send the formal reminder?"
+        "to": "Martina Gallo (Kestrel Freight)",
+        "text": "Hello Martina, invoice 2026-031 was due by 16 November and we have not received the payment yet. Could you let me know when it will be paid? Thank you, Luca Moretti, Brightloop"
       },
       {
         "type": "create_task",
-        "title": "Send formal reminder to Kestrel Freight",
+        "title": "Check Kestrel Freight payment for invoice 2026-031",
         "assignee": "luca",
-        "due_date": "2026-11-26"
+        "due_date": "2026-11-27"
       }
     ],
     "cites": [
       {
         "source_id": "src_chat_kestrel",
-        "quote": "that's over a week late"
+        "quote": "every November payment is matched except Kestrel Freight, invoice 2026-031"
       },
       {
         "source_id": "src_email_kestrel_pay",
         "quote": "Payment should go out by 16 November at the latest"
+      },
+      {
+        "source_id": "src_chat_invoices",
+        "quote": "first reminder 7 days after the due date"
       }
     ],
-    "created_at": "2026-11-23T12:00:00",
+    "created_at": "2026-11-24T08:30:00",
     "decided_at": null
   }
 ]

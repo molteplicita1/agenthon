@@ -108,7 +108,9 @@ for a in actions:
         t = e["type"]
         if t == "update_task" and (src.get(e["task_id"], {}).get("type") != "task"): err(f"{i}: update_task on unknown task")
         if t == "create_task" and (e["assignee"] not in got or not DATE_RE.match(e["due_date"])): err(f"{i}: bad create_task")
-        if t == "send_message" and e["to"] not in got and e["to"] not in ("#tech", "#sales", "#finance", "#random"):
+        # target: a person id, a channel, or an outside contact written as "Name (Company)"
+        if t == "send_message" and e["to"] not in got and e["to"] not in ("#tech", "#sales", "#finance", "#random") \
+                and not re.match(r"^[A-Z][a-z]+ [A-Z][a-z]+ \([A-Z][A-Za-z ]+\)$", e["to"]):
             err(f"{i}: bad send_message target {e['to']}")
         if t not in ("update_task", "create_task", "send_message"): err(f"{i}: unknown effect {t}")
 

@@ -10,12 +10,12 @@ import {
   personFirstName,
   personFullName,
 } from "./format";
-import { MemoryItem, Overview, SOURCE_TYPE_LABEL, Source } from "./types";
+import { MemoryItem, Overview, SOURCE_TYPE_LABEL, Source, Track, TRACKS } from "./types";
 
 const POLL_INTERVAL_MS = 2000;
 const HIGHLIGHT_DURATION_MS = 3200;
 
-type HighlightKind = "new" | "updated";
+type HighlightKind = "new" | "updated" | "caught";
 
 const TASK_COLUMNS: Array<{ status: NonNullable<Source["status"]>; label: string }> = [
   { status: "todo", label: "To do" },
@@ -47,6 +47,10 @@ function sortMemory(items: MemoryItem[]): MemoryItem[] {
     if (aProposed === 0) {
       return b.created_at.localeCompare(a.created_at);
     }
+
+    const aCaught = (a.caught?.length ?? 0) > 0 ? 0 : 1;
+    const bCaught = (b.caught?.length ?? 0) > 0 ? 0 : 1;
+    if (aCaught !== bCaught) return aCaught - bCaught;
 
     const aTime = a.decided_at ?? a.created_at;
     const bTime = b.decided_at ?? b.created_at;
@@ -84,12 +88,23 @@ function diffOverview(prev: Overview, next: Overview): Record<string, HighlightK
     const old = prevMemory.get(item.id);
     if (!old) {
       changes[`mem:${item.id}`] = "new";
-    } else if (
-      old.status !== item.status ||
-      old.decided_by !== item.decided_by ||
-      old.statement !== item.statement
-    ) {
-      changes[`mem:${item.id}`] = "updated";
+    } else {
+      const oldCaught = Array.isArray(old.caught) ? old.caught : [];
+      const newCaught = Array.isArray(item.caught) ? item.caught : [];
+      const caughtChanged =
+        oldCaught.length !== newCaught.length ||
+        newCaught.some((label, idx) => oldCaught[idx] !== label);
+
+      if (caughtChanged && newCaught.length > 0) {
+        changes[`mem:${item.id}`] = "caught";
+      } else if (
+        old.status !== item.status ||
+        old.decided_by !== item.decided_by ||
+        old.statement !== item.statement ||
+        caughtChanged
+      ) {
+        changes[`mem:${item.id}`] = "updated";
+      }
     }
   }
 
@@ -109,7 +124,7 @@ export default function App() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [backendUnreachable, setBackendUnreachable] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [busyAction, setBusyAction] = useState<"reset" | "next" | null>(null);
+  const [busyAction, setBusyAction] = useState<"reset" | Track | null>(null);
   const [highlights, setHighlights] = useState<Record<string, HighlightKind>>({});
 
   const prevOverviewRef = useRef<Overview | null>(null);
@@ -199,13 +214,13 @@ export default function App() {
     }
   };
 
-  const handleNextEvent = async () => {
+  const handleNextEvent = async (track: Track) => {
     if (busyAction) return;
-    setBusyAction("next");
+    setBusyAction(track);
     setActionError(null);
     requestSeqRef.current++;
     try {
-      await triggerNextEvent();
+      await triggerNextEvent(track);
       await loadOverview();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to simulate incoming event.");
@@ -248,7 +263,6 @@ export default function App() {
     return sortMemory(overview.memory);
   }, [overview]);
 
-  const remainingEvents = overview?.remaining_events ?? 0;
   const lastEvent = overview?.last_event ?? null;
   const lastEventHighlight = highlights["last_event"];
 
@@ -301,16 +315,34 @@ export default function App() {
             <span>Start the day</span>
           </button>
 
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleNextEvent}
-            disabled={busyAction !== null || !overview || remainingEvents === 0}
-          >
-            {busyAction === "next" && <span className="spinner" aria-hidden="true" />}
-            <span>Simulate incoming event</span>
-            <span className="btn-count">({remainingEvents} left)</span>
-          </button>
+          {TRACKS.map(({ id, label }) => {
+            const remaining = overview?.remaining_events[id] ?? 0;
+            const nextStep = overview?.next_step[id] ?? null;
+            return (
+              <div key={id} className="next-event-group">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => void handleNextEvent(id)}
+                  disabled={busyAction !== null || !overview || remaining === 0 || nextStep === null}
+                >
+                  {busyAction === id && <span className="spinner" aria-hidden="true" />}
+                  <span>{label}</span>
+                  <span className="btn-count">({remaining} left)</span>
+                </button>
+
+                {overview &&
+                  (nextStep ? (
+                    <p className="next-step-line">
+                      <span className="next-step-label">Next: </span>
+                      {nextStep}
+                    </p>
+                  ) : (
+                    <p className="next-step-line next-step-done">No more steps</p>
+                  ))}
+              </div>
+            );
+          })}
         </div>
 
         {actionError && (
@@ -452,10 +484,11 @@ export default function App() {
             <div className="stack-list">
               {sortedMemory.map((item) => {
                 const hl = highlights[`mem:${item.id}`];
+                const caughtList = Array.isArray(item.caught) ? item.caught : [];
                 return (
                   <article
                     key={item.id}
-                    className={`memory-card${hl ? " is-highlighted" : ""}`}
+                    className={`memory-card${caughtList.length > 0 ? " memory-card-caught" : ""}${hl ? " is-highlighted" : ""}`}
                   >
                     <div className="memory-tags">
                       <span className={`memory-status memory-status-${item.status}`}>
@@ -466,11 +499,20 @@ export default function App() {
                       </span>
                       {hl && (
                         <span className="change-badge" style={{ marginLeft: "auto" }}>
-                          {hl === "new" ? "New" : "Updated"}
+                          {hl === "new" ? "New" : hl === "caught" ? "Caught" : "Updated"}
                         </span>
                       )}
                     </div>
                     <p className="memory-statement">{item.statement}</p>
+                    {caughtList.length > 0 && (
+                      <div className="caught-list">
+                        {caughtList.map((label, index) => (
+                          <span key={`${item.id}-caught-${index}`} className="caught-tag">
+                            <strong className="caught-prefix">Caught:</strong> {label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     {item.decided_by && (
                       <p className="memory-decided">
                         {MEMORY_STATUS_LABEL[item.status]} by {personFullName(item.decided_by)}

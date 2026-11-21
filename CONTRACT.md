@@ -173,12 +173,13 @@ interface MemoryItem {
   decided_by: string | null;     // person id
   decided_at: string | null;
   can_decide: boolean;           // computed for the current user; false in the overview
+  caught: string[];              // labels of new work found going against this item (section 12); usually []
 }
 
 type Effect =
   | { type: "update_task"; task_id: string; changes: { due_date?: string; status?: string } }
   | { type: "create_task"; title: string; assignee: string; due_date: string }
-  | { type: "send_message"; to: string; text: string };   // to: "#tech" or a person id
+  | { type: "send_message"; to: string; text: string };   // to: "#tech", a person id, or an outside contact "Name (Company)"
 
 interface Action {
   id: string;                    // "act_…"
@@ -219,8 +220,10 @@ interface Overview {             // everything; used by the web page
   tasks: Source[];               // all sources of type "task"
   outbox: OutboxMessage[];
   memory: MemoryItem[];          // all items, any status
-  last_event: Source | null;     // last source injected by /demo/next-event
-  remaining_events: number;
+  last_event: Source | null;     // the source behind the last demo step
+  remaining_events: { tech: number; finance: number };      // demo steps left, per button
+  next_step: { tech: string | null; finance: string | null }; // what the next press of each button will do,
+                                 // e.g. "Action for Giulia Ferri: Move 'Alpilog – API migration'…"
 }
 ```
 
@@ -255,8 +258,8 @@ Codes: `401` unknown user · `403` not allowed · `404` not found · `409` alrea
 | `GET /sources/{id}` | yes | – | `Source` | `403` if not visible to me. Works for task ids too. |
 | `GET /brief/audio` | yes | – | `audio/mpeg` | My latest brief, spoken. Cached on disk. `503` if voice is not configured. |
 | `GET /demo/overview` | no | – | `Overview` | The web page polls this every 2 s. No model calls. |
-| `POST /demo/next-event` | no | – | `{ "event": Source \| null, "remaining": number }` | Injects the next scripted event and runs the watcher (section 12). Returns when done (2–6 s). `event` is `null` when the queue is empty. |
-| `POST /demo/reset` | no | – | `{ "ok": true }` | "Start the day": restores the seed and writes a fresh morning brief for every person (section 11). Returns when done. |
+| `POST /demo/next-event?track=tech` | no | – | `{ "event": Source \| null, "remaining": number }` | Runs the next step of that track of the demo script (section 12). `track` is `tech` (default) or `finance`; anything else → `404`. Returns when done (up to 6 s). `event` is the source behind the step, or `null` when no step is left in that track. |
+| `POST /demo/reset` | no | – | `{ "ok": true }` | "Start the day": restores the seed, writes a fresh morning brief for every person and prepares its audio (section 11). Returns when done. |
 
 Example — `POST /ask` as `giulia`, after the PostgreSQL item is approved:
 
@@ -331,13 +334,16 @@ items are required exactly, because `DEMO.md` depends on them.
 | `mem_azure` | "Brightloop will migrate from AWS to Azure in 2027." **Proposed.** | tech | all |
 | `src_doc_contract` | Doc "Alpilog – contract summary 2026": value **€84,000**, three milestones, 30-day payment terms. | finance | finance |
 | `mem_contract` | "The Alpilog contract for 2026 is worth €84,000, invoiced in three milestones." **Approved** by `luca`. | finance | finance |
+| `src_chat_kestrel` | Chat #finance, Mon 23 Nov 11:45, Elena: the bank reconciliation matched every November payment except Kestrel Freight invoice 2026-031. Nobody in it plans what to do next. | finance | finance |
+| `act_kestrel` | Pending action for `luca`: "Send the first payment reminder to Kestrel Freight" (message to Martina Gallo, plus a follow-up task). Cites the chat above, Kestrel's promise to pay by 16 Nov, and the 7-day reminder rule. | – | – |
 | `src_pr_mongo` | **The only item of `incoming.json`.** Pull request "Add MongoDB store for Alpilog reports", author Marco Riva, open, reviewer Giulia Ferri. The body says it adds a MongoDB collection for pre-aggregated shipment and invoice reports. | tech | tech |
 
 Nothing in the seed may mention a parental leave policy (used for the "I don't know" check).
 Apart from `src_chat_pg` and `src_pr_mongo`, nothing in the seed may mention MongoDB.
 
-Giulia's brief after reset must cover, with citations: the go-live clash (`act_golive`),
-the forgotten promise (`act_key`), and the two memory proposals waiting for her (`mem_pg`, `mem_azure`).
+Giulia's brief after reset must mention, with citations: the go-live clash (`act_golive`),
+the forgotten promise (`act_key`), and the two memory proposals (`mem_pg`, `mem_azure`).
+It only mentions them: the cards arrive later, one at a time (section 11).
 
 ## 10. Seed files (written by the data agent, loaded by the backend)
 
@@ -349,7 +355,7 @@ All in `backend/data/seed/`. The backend validates them at startup and fails lou
 | `sources.json` | `Source[]` — all five types, tasks included. |
 | `memory.json` | `StoredMemoryItem[]` |
 | `actions.json` | `StoredAction[]` |
-| `incoming.json` | `Source[]` — the queue for `POST /demo/next-event`. One item: `src_pr_mongo`. Its timestamp is replaced by the fictional "now" when it is injected. |
+| `incoming.json` | `Source[]` — new work that the demo script (section 12) injects in its "source" steps. One item: `src_pr_mongo`. Its timestamp is replaced by the fictional "now" when it is injected. |
 
 Stored shapes differ from the API shapes only in how evidence is kept
 (the backend builds `citations` and `can_decide` when it answers):
@@ -391,25 +397,58 @@ The Brain starts a conversation in two ways only:
 
 | | `brief` | `alert` |
 |---|---|---|
-| Triggered by | The start of the day | An event |
-| About | Everything waiting for the person, plus what changed since yesterday | One thing, right when it happens |
-| Created when | `POST /demo/reset` ("Start the day") | The watcher handles a new source (section 12) |
-| Spoken version | Yes (`GET /brief/audio`) | No |
+| Triggered by | The start of the day | One thing that happens during the day |
+| Content | A short summary: what changed since yesterday and what will need the person's decision today | One thing, with its card if a decision is needed |
+| Created when | `POST /demo/reset` ("Start the day") | `POST /demo/next-event`, one per press of a demo button (section 12) |
+| Voice | Yes, sent automatically right after the text | No |
 
-**After a reset each person's thread holds exactly one message: the brief.**
-It embeds everything waiting for that person: the pending actions where they are
-`for_user`, and the proposed memory items they can decide.
+**"Start the day" sends one thing only: the brief.** After a reset each person's
+thread holds exactly one message, the brief, with `actions: []` and
+`memory_items: []`. Its text mentions what is waiting (pending actions for the
+person, memory proposals they can decide) and says they will arrive one at a time.
+It must not say "below" or refer to cards. The backend prepares the audio during
+the reset, so `GET /brief/audio` answers at once.
+
+**Everything that needs a decision arrives later, one message per press** of
+"Simulate tech event" or "Simulate finance event". This keeps the demo readable:
+one thing on screen at a time.
 
 **Where things are approved:** on Telegram, with the Approve / Reject buttons under
-each item. Every pending item appears once: in the brief if it comes from the seed,
-in the alert if the watcher created it live.
+the card that came with the alert.
 
-## 12. Active memory: the watcher
+## 12. The demo script and the watcher
 
-`POST /demo/next-event` is the one place where the Brain reacts live to new work.
-It does these steps in order, then returns:
+`POST /demo/next-event?track=…` runs the next step of a fixed script and returns.
+The script lives in `backend/demo_script.json` (owned by the backend agent). It has
+two tracks, one per demo button, because the demo uses only two accounts: Giulia
+(tech) and Luca (finance). Each track has its own position.
 
-1. Take the next source from the queue, set its timestamp to the fictional "now",
+| Track | # | Step | Result |
+|---|---|---|---|
+| tech | 1 | release `act_golive` | alert to Giulia with the action card |
+| tech | 2 | release `mem_pg` | alert to Giulia with the memory card |
+| tech | 3 | release `mem_azure` | alert to Giulia with the memory card |
+| tech | 4 | source `src_pr_mongo` | the watcher runs live (below) |
+| tech | 5 | release `act_key` | alert to Giulia with the action card |
+| finance | 1 | release `act_kestrel` | alert to Luca: Kestrel Freight has not paid, with the action card |
+
+The other pending seed items (`act_flaky` for Marco, `mem_verdello` for Sara) stay
+in the seed but are not in the script: nobody plays Marco or Sara in the demo.
+
+**A "release" step** takes an item that is already in the seed and brings it to the
+person who must decide (an action's `for_user`, or the lead of a memory item's
+team). No model call. It adds one `alert` to that person's thread, embedding the item:
+
+- action: text = the action's `reason`, citations = the action's citations;
+- memory item: text = `I noticed this in <source label>. Should I remember it?`,
+  citations = the item's citations.
+
+The `event` returned (and `last_event` in the overview) is the first source the
+item cites, so the web page can show what the Brain reacted to.
+
+**A "source" step** is the watcher: the one place where the Brain reacts live to new work.
+
+1. Take the source from `incoming.json`, set its timestamp to the fictional "now",
    add it to the sources.
 2. Make **one** model call. Input: the new source, plus the approved memory items
    that the lead of the source's team may see. Output:
@@ -418,6 +457,9 @@ It does these steps in order, then returns:
    {
      conflict_memory_id: string | null;   // approved item this source goes against
      conflict_quote: string | null;       // exact words of the new source that show it
+     alert_text: string | null;           // only with a conflict: the alert for the lead, 50 words at most.
+                                          // Says what the new work does, which decision it goes against, and why that matters.
+     message_to_author: string | null;    // only with a conflict: a short, friendly note to the author, 40 words at most
      facts: { statement: string; quote: string }[];   // at most 2 things worth remembering
    }
    ```
@@ -425,24 +467,41 @@ It does these steps in order, then returns:
    - `conflict_memory_id` must be one of the items given to the model, else treat it as `null`.
    - A quote that is not an exact substring of the source body becomes `null`
      (for the conflict) or drops the fact.
+   - `alert_text` and `message_to_author` are used only if they are not empty, within
+     their word limit (allow 20% slack) and free of `[n]` markers. Otherwise the
+     fixed template below is used instead.
 4. **If there is a conflict**, add one `alert` to the thread of the lead of the
-   source's team. Everything is built from templates, no second model call:
-   - Text: `<author>'s <type label> "<title>" goes against a decision the team approved: <statement> [1][2]`
-   - Citations: `[1]` the source of the memory item, `[2]` the new source.
+   source's team. The model wrote the words; the code decides everything else.
+   No second model call:
+   - Text: the model's `alert_text`, with ` [1][2]` added by code at the end.
+     Template if unusable: `<author>'s <type label> "<title>" goes against a decision the team approved: <statement> [1][2]`
+   - Citations: `[1]` the source of the memory item, `[2]` the new source. Always set by code.
    - If the author is one of the four people and is not that lead, embed one
-     pending action for the lead: title `Ask <first name> to hold "<title>"`, with one
-     `send_message` effect to the author:
+     pending action for the lead: title `Ask <first name> to hold "<title>"` (fixed),
+     with one `send_message` effect to the author whose text is the model's
+     `message_to_author`. Template if unusable:
      `Your <type label> "<title>" goes against a team decision: <statement> Can we talk before it is merged?`
+   - Add the new source's label to the `caught` list of that memory item, so the
+     web page can show that the decision caught something.
    - Facts from this source are discarded.
 5. **Otherwise**, for each valid fact create a proposed memory item (`team` and
    `visible_to` copied from the source) and add one `alert` to the lead's thread
    that embeds them.
 
-**What is live and what is seeded.** Live, through real code: answers, the morning
-brief, approvals and their effects, memory proposals from a new source, and the
-conflict alert above. Seeded as yesterday's history by the data agent: the two
-memory proposals, the forgotten-promise action and the go-live action. Spotting a
-clash between a newly approved fact and a task (the go-live story) is not built.
+Approving or rejecting the "Ask … to hold" action does **not** change any memory
+item: approving adds one line to "Sent messages", rejecting changes nothing.
+
+`next_step` in the overview describes the next step of each track in a few words
+(`Action for Giulia Ferri: <title>`, `Memory proposal for Giulia Ferri: <statement>`,
+`New pull request by Marco Riva: <title>`), or is `null` when none is left.
+
+**What is live and what is seeded.** Live, through real code and the model: answers,
+the morning brief, and the conflict on the pull request (the decision that there is
+a conflict, the alert text and the note to the author). Live, through real code
+without the model: approvals and their effects. Seeded by the data agent and only
+released by the script: the go-live action, the forgotten-promise action and the
+two memory proposals. Spotting a clash between a newly approved fact and a task
+(the go-live story) is not built.
 
 ## 13. The Telegram bot
 
@@ -452,20 +511,19 @@ It holds no rules and makes no model calls.
 **Who is who.** On `/start` the bot asks "Who are you?" with one button per person
 (from `GET /people`). The choice ties that Telegram chat to that person until the
 next `/start`. The bot keeps this in `bot/bot_state.json`.
+**Tying a chat delivers nothing:** every message already in that person's thread is
+marked as sent. Only messages created afterwards arrive.
 
 **Delivering what the Brain says.** Every 2 seconds, for each tied chat, the bot
 calls `GET /state` and sends every thread message with `from: "brain"` and kind
 `brief` or `alert` that it has not sent to that chat yet (it remembers message ids).
-A chat that has just been tied receives what is already in the thread.
 
-One Brain message becomes several Telegram messages:
-
-| What | Telegram message | Buttons |
+| What | Telegram message(s) | Buttons |
 |---|---|---|
-| `brief` | "Morning brief", the text, then the sources as footnotes | `Listen to the brief`, one button per source |
-| `alert` | "Alert", the text, footnotes | one button per source |
-| each embedded action | title, reason, effects in plain words, footnotes | `Approve`, `Reject` (only if `pending`), sources |
-| each embedded memory item | "Should I remember this?", the statement, footnotes | `Approve`, `Reject` (only if `proposed` and `can_decide`), sources |
+| `brief` | First: "Morning brief", the text, the sources as footnotes. Then, at once and without being asked: the voice message from `GET /brief/audio`. If the audio fails, send only the text. | one button per source. No "Listen" button. |
+| `alert` with exactly one card (every alert in the demo) | **One message**: "Alert", the text, then the card: for an action "Proposed: <title>" and its effects in plain words (the reason is not repeated, the alert text already says it); for a memory item "Remember: <statement>". Then the footnotes. | `Approve`, `Reject` (only if `pending`, or `proposed` and `can_decide`), sources |
+| `alert` with no card, or with two or more | "Alert", the text, footnotes; then one message per card | one button per source; each card has its own `Approve`, `Reject` and sources |
+| a card sent on its own | action: title, reason, effects in plain words, footnotes. Memory item: "Should I remember this?", the statement, footnotes | as above |
 | answer to a question | the text, footnotes | one button per source |
 
 A footnote line looks like: `[1] Email · Elisa Brandt (Alpilog) · Mon 23 Nov 16:40 — "bring the go-live forward to 4 December"`.
@@ -477,10 +535,9 @@ A footnote line looks like: `[1] Email · Elisa Brandt (Alpilog) · Mon 23 Nov 1
 | sends any text | shows "typing", calls `POST /ask`, replies with the answer |
 | taps `Approve` / `Reject` | calls the matching endpoint, then edits that message: buttons removed, "Approved" or "Rejected" added. On `403` or `409` it shows the error and changes nothing. |
 | taps a source button | calls `GET /sources/{id}` and sends type, title, author, time and body. On `403`: "You don't have access to this source." |
-| taps `Listen to the brief` | calls `GET /brief/audio` and sends it as a voice message |
 
 Button payloads (Telegram allows 64 bytes): `who:<person_id>`, `act:approve:<id>`,
-`act:reject:<id>`, `mem:approve:<id>`, `mem:reject:<id>`, `src:<source_id>`, `brief:audio`.
+`act:reject:<id>`, `mem:approve:<id>`, `mem:reject:<id>`, `src:<source_id>`.
 
 ## 14. The web page (control room)
 
@@ -489,13 +546,55 @@ window on the simulated tools; it is not where people work.
 
 It polls `GET /demo/overview` every 2 seconds and shows:
 
+- **Demo controls**: `Start the day` (`POST /demo/reset`),
+  `Simulate tech event` (`POST /demo/next-event?track=tech`) and
+  `Simulate finance event` (`POST /demo/next-event?track=finance`). Under each
+  simulate button, the line `Next: <next_step of that track>` so the presenter knows
+  what the press will send; when no step is left the button is disabled. Plus a card
+  with the last event.
 - **Task board**, Jira-style: one column per status, a card per task with title,
   assignee and due date.
 - **Sent messages**: the simulated outbox. Empty state: "Nothing has been sent."
 - **Company memory**: every memory item with its status (Proposed / Approved /
-  Rejected), who can see it, and who decided.
-- **Demo controls**: `Start the day` (`POST /demo/reset`) and
-  `Simulate incoming event` (`POST /demo/next-event`), plus a card with the last event.
+  Rejected), who can see it, and who decided. An item with a non-empty `caught`
+  list shows a clear tag: `Caught: <label>`. This is the visible proof that the
+  memory is active.
 
 Anything that changes is highlighted for a moment, so the audience sees the effect
 of a tap on Telegram.
+
+## 15. Change set 2 (what changed after the first build)
+
+Where this section and an older task list disagree, this section wins.
+
+| Area | Change | Who |
+|---|---|---|
+| Brief | Embeds no cards. Text only mentions what is waiting. Audio prepared at reset. (section 11) | backend |
+| Demo steps | `/demo/next-event` runs a fixed script: release steps and one watcher step. New `next_step` in the overview. (section 12) | backend |
+| Active memory made visible | New `caught` field on memory items, filled by the watcher. (sections 6, 12) | backend |
+| Conflict alert written by the model | Same single model call now also returns the alert text and the note to the author; code checks them and falls back to the template. (section 12) | backend |
+| Telegram | Tying a chat delivers nothing. Brief = text, then voice automatically. No "Listen" button. (section 13) | bot |
+| Web page | `Next: …` line under the button. `Caught: …` tag in Company memory. (section 14) | frontend |
+
+## 16. Change set 3 (after the first full test)
+
+Where this section and an older part of this file or a task list disagree, this section wins.
+
+| Area | Change | Who |
+|---|---|---|
+| Telegram | An alert and its single card are one Telegram message, not two (section 13). Fewer notifications, less confusion. | bot |
+| Demo steps | Two tracks, `tech` and `finance`, each with its own position. Marco's and Sara's items left the script, not the seed. `next_step` and `remaining_events` in the overview are now per track. (sections 6, 7, 12) | backend |
+| Finance story | `act_kestrel` is now "Send the first payment reminder to Kestrel Freight": the Brain notices the client has not paid. The #finance chat no longer has Luca saying he will ask Sara, which made the Brain look like it repeated him. `send_message` may go to an outside contact. (sections 6, 9) | backend, data |
+| Web page | Two buttons, `Simulate tech event` and `Simulate finance event`, each with its own `Next: …` line. (section 14) | frontend |
+
+
+## 17. Change set 4 (3-minute pitch: no repetitions)
+
+Where this section and an older part of this file or a task list disagree, this section wins.
+
+| Area | Change | Who |
+|---|---|---|
+| Startup | Every start of the backend is a new demo: the state is rebuilt from the seed (an old `state.json` is overwritten) with empty threads and no brief. The first brief comes only from `POST /demo/reset` ("Start the day"). `GET /brief/audio` answers `404` until then. | backend |
+| Telegram | Every start of the bot is a new demo: it drops updates sent while it was off and deletes from each chat the messages of the last run (its own and the person's; it keeps their ids in `bot/bot_state.json`). Ties are kept. Telegram deletes only messages younger than 48 h. | bot |
+| Brief | Repeats nothing an alert brings later. It holds no pending actions and no memory proposals (each arrives as its own alert), and no approved fact whose sources are cited by any item of `demo_script.json`. With nothing left (the case for every person in the seed) the text is: `Good morning, <first name>. Nothing needs you right now. I will message you as soon as something does.` No citations. Voice as usual. Replaces the "Content" and "mentions what is waiting" lines of section 11. | backend |
+| Demo steps | Tech track is `act_golive`, `mem_pg`, `src_pr_mongo` (3 presses). `mem_azure` and `act_key` left the script, not the seed. DEMO.md has 14 steps. | backend |

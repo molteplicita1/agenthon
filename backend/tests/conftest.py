@@ -7,6 +7,7 @@ import pytest
 
 os.environ["BRAIN_STATE_PATH"] = str(Path(tempfile.mkdtemp()) / "state.json")
 os.environ["BRAIN_NO_LLM"] = "1"  # tests never call outside services
+os.environ["BRAIN_NO_VOICE"] = "1"
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from fastapi.testclient import TestClient  # noqa: E402

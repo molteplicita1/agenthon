@@ -93,3 +93,17 @@ Backend unreachable shows one clear banner. Check the page at 950 px and 1440 px
 
 During a run of `DEMO.md`, every change expected "on the web page" shows up within
 two seconds, with no reload.
+
+## Change set 2 (do these now)
+
+Read `CONTRACT.md` section 15 first, then sections 6 and 14, and the new `DEMO.md`.
+Where they disagree with the tasks above, they win.
+
+**F4 — What the next press sends.**
+Under "Simulate incoming event" show `Next: <next_step>` from the overview. When
+`next_step` is `null`, show "No more steps" and disable the button.
+
+**F5 — Caught tag.**
+In "Company memory", an item with a non-empty `caught` list shows a clear tag
+`Caught: <label>` and is highlighted when the tag appears. Update the types and
+the mock data for the two new fields (`caught`, `next_step`).

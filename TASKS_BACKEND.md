@@ -95,3 +95,37 @@ API, three runs in a row.
 - When a memory item is approved, check it against the open tasks and alert the
   task owner (the go-live story, which today is seeded).
 - When the Brain says "I don't know", propose an action "Ask <person>".
+
+## Change set 2 (do these now)
+
+Read `CONTRACT.md` section 15 first, then sections 6, 7, 11 and 12, and the new
+`DEMO.md`. Where they disagree with the tasks above, they win. You are the one who
+keeps `CONTRACT.md` right: if you find a mistake in it, fix it and log it.
+
+**B8 — Brief without cards.**
+The brief message has `actions: []` and `memory_items: []`. Its text still mentions
+what is waiting for the person and says the items will arrive one at a time; it
+must not say "below" or refer to cards. During the reset, prepare the audio of
+every brief (in parallel; a voice failure must not fail the reset).
+
+**B9 — Demo script.**
+`backend/demo_script.json` with the steps of section 12, in that order.
+`POST /demo/next-event` runs the next step: a release step (no model call) or the
+watcher step. `remaining_events`, `last_event` and the new `next_step` in the
+overview follow the script.
+
+**B10 — Caught.**
+New `caught` list on memory items. The watcher adds the new source's label to the
+item it conflicts with. It is reset by "Start the day".
+
+**B10b — Conflict alert written by the model.**
+In the watcher's single model call, also ask for `alert_text` and
+`message_to_author` (section 12, steps 2 to 4). Check them in code and fall back to
+the templates when they are unusable. The title of the action, the citations and
+the decision that a conflict exists stay in code. Add a test for the fallback.
+
+**B11 — Tests and check.**
+Update the tests that the changes break. Then run `DEMO.md` (all 14 steps and the
+counter-test) through the API once. Tell the humans before you start: the tied
+Telegram chats will receive those messages. Write `CHANGE SET 2 READY` in
+`handoff/backend.md` when the API matches the contract.

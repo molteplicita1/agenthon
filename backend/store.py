@@ -14,6 +14,7 @@ SEED = Path(os.environ.get("BRAIN_SEED_DIR", DATA / "seed"))
 STATE_PATH = Path(os.environ.get("BRAIN_STATE_PATH", DATA / "state.json"))
 RESET_NOW = "2026-11-24T09:00:00"
 TEAMS = {"sales", "tech", "finance"}
+TRACKS = {"tech", "finance"}  # the two buttons of the control room, one demo script each
 ID_RE = re.compile(r"^[a-z0-9_]{1,40}$")
 TYPE_LABEL = {"email": "Email", "chat": "Chat", "doc": "Doc", "task": "Task", "pr": "Pull request"}
 IDK = "I don't know. I can't find this in the memory you have access to."
@@ -27,6 +28,7 @@ S: dict = {}  # the live state
 def load_seed() -> dict:
     load = lambda n: json.loads((SEED / f"{n}.json").read_text(encoding="utf-8"))
     seed = {n: load(n) for n in ("people", "sources", "memory", "actions", "incoming")}
+    seed["script"] = json.loads((Path(__file__).parent / "demo_script.json").read_text(encoding="utf-8"))
     validate(seed)
     return seed
 
@@ -74,6 +76,13 @@ def validate(seed: dict) -> None:
         for e in a["effects"]:
             if e["type"] == "update_task" and e["task_id"] not in srcs:
                 errors.append(f"{a['id']}: unknown task {e['task_id']}")
+    releasable = {x["id"] for x in seed["actions"] + seed["memory"]}
+    if not isinstance(seed["script"], dict) or set(seed["script"]) != TRACKS:
+        errors.append(f"demo_script.json: needs exactly the tracks {sorted(TRACKS)}")
+    for step in [s for steps in (seed["script"].values() if isinstance(seed["script"], dict) else []) for s in steps]:
+        pool = releasable if step["step"] == "release" else {s["id"] for s in seed["incoming"]}
+        if step["step"] not in ("release", "source") or step["id"] not in pool:
+            errors.append(f"demo_script.json: bad step {step}")
     if errors:
         raise SystemExit("SEED INVALID:\n  " + "\n  ".join(errors))
 
@@ -85,7 +94,10 @@ def fresh_state() -> dict:
     seed["threads"] = {p["id"]: [] for p in seed["people"]}
     seed["outbox"] = []
     seed["last_event"] = None
+    seed["script_pos"] = {t: 0 for t in seed["script"]}
     seed["reset_at"] = time.time()
+    for m in seed["memory"]:
+        m["caught"] = []
     return seed
 
 
@@ -96,16 +108,10 @@ def save() -> None:
         tmp.replace(STATE_PATH)
 
 
-def load_or_init(make_briefs) -> None:
-    """At startup: reuse state.json if present, else build a fresh state (template briefs only)."""
-    load_seed()  # validate the seed even when state.json exists
-    if STATE_PATH.exists():
-        S.clear()
-        S.update(json.loads(STATE_PATH.read_text(encoding="utf-8")))
-    else:
-        st = fresh_state()
-        make_briefs(st, use_model=False)
-        replace(st)
+def load_or_init() -> None:
+    """At startup: always a fresh state from the seed, with empty threads. Every restart is a new demo;
+    state.json from the last run is overwritten. No brief here: it comes from Start the day."""
+    replace(fresh_state())
 
 
 def replace(new: dict) -> None:
@@ -190,6 +196,7 @@ def render_memory(st, m: dict, user: dict | None) -> dict:
     out = {k: v for k, v in m.items() if k != "cites"}
     out["citations"] = citations(st, m["cites"])
     out["can_decide"] = bool(user) and can_decide_memory(user, m)
+    out["caught"] = list(m.get("caught", []))
     return out
 
 

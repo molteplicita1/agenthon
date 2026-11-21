@@ -73,3 +73,21 @@ two different people, and the backend being down gives a clear message instead o
 ## Only if time is left (ask the humans first)
 
 - A person sends a voice message instead of text: transcribe it and treat it as a question.
+
+## Change set 2 (do these now)
+
+Read `CONTRACT.md` section 15 first, then section 13, and the new `DEMO.md`.
+Where they disagree with the tasks above, they win.
+
+**T7 — Tying delivers nothing.**
+After `/start` and the choice of the person, mark every message already in that
+person's thread as sent. Only messages created afterwards arrive.
+
+**T8 — Brief with automatic voice.**
+A `brief` becomes two Telegram messages: the text (title, text, footnotes, source
+buttons), then at once the voice message from `GET /brief/audio`. Remove the
+"Listen to the brief" button and its handler. If the audio fails, send only the text.
+
+**T9 — Check.**
+With a human: `/start`, then steps 1, 2, 5, 7, 8 and 14 of `DEMO.md`. Report in
+`handoff/bot.md`.

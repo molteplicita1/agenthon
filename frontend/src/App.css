@@ -158,8 +158,33 @@
 .controls-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+}
+
+.next-event-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.next-step-line {
+  font-size: 14px;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.next-step-label {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.next-step-done {
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
 .btn {
@@ -517,6 +542,32 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
+}
+
+.memory-card-caught {
+  border-left: 4px solid #ea580c;
+}
+
+.caught-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.caught-tag {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9a3412;
+  background: #ffedd5;
+  border: 1px solid #f97316;
+  border-radius: 6px;
+  padding: 3px 9px;
+  overflow-wrap: anywhere;
+}
+
+.caught-prefix {
+  font-weight: 800;
 }
 
 /* Highlight animation (F2) */

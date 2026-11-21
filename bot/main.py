@@ -97,7 +97,7 @@ def send(chat_id, text, rows=None):
         markup = keyboard(rows or []) if i == len(parts) - 1 else None
         if markup:
             params["reply_markup"] = markup
-        tg("sendMessage", **params)
+        remember(chat_id, tg("sendMessage", **params))
 
 
 def esc(text) -> str:
@@ -150,6 +150,26 @@ def person_of(chat_id):
     with lock:
         chat = state["chats"].get(str(chat_id))
         return chat["person"] if chat else None
+
+
+def remember(chat_id, message):
+    """Note every Telegram message of a chat (ours and the person's), so the next start can wipe it."""
+    if message and "message_id" in message:
+        with lock:
+            state.setdefault("tg_messages", {}).setdefault(str(chat_id), []).append(message["message_id"])
+            save_state()
+
+
+def wipe_chats():
+    """Every start is a new demo (CONTRACT section 17): delete what the last run left in the chats.
+    Ties are kept, so nobody has to /start again. Telegram only deletes messages younger than 48 h."""
+    with lock:
+        chats = state.pop("tg_messages", {})
+        save_state()
+    for chat_id, ids in chats.items():
+        for i in range(0, len(ids), 100):
+            tg("deleteMessages", chat_id=chat_id, message_ids=ids[i:i + 100])
+        log(f"chat {chat_id}: {len(ids)} messages of the last run deleted")
 
 
 # ---------- people ----------
@@ -272,12 +292,36 @@ def render_memory(item):
     return text, rows + source_rows(item["citations"])
 
 
+def render_alert_with_card(msg, person):
+    """An alert with exactly one card → ONE Telegram message: the alert text, then what the card
+    asks, with its buttons. The alert text already says why, so the card's reason is not repeated."""
+    status_word = lambda s: {"approved": APPROVED, "rejected": REJECTED}.get(s)
+    rows = []
+    if msg.get("actions"):
+        a = msg["actions"][0]
+        effects = "\n".join(effect_line(e, person) for e in a.get("effects", []))
+        card = body(f"<b>Proposed: {esc(a['title'])}</b>", f"If you approve:\n{effects}" if effects else "")
+        status = status_word(a["status"])
+        if a["status"] == "pending":
+            rows.append([{"text": "Approve", "callback_data": f"act:approve:{a['id']}"},
+                         {"text": "Reject", "callback_data": f"act:reject:{a['id']}"}])
+    else:
+        m = msg["memory_items"][0]
+        card = f"<b>Remember:</b> {esc(m['statement'])}"
+        status = status_word(m["status"])
+        if m["status"] == "proposed" and m.get("can_decide"):
+            rows.append([{"text": "Approve", "callback_data": f"mem:approve:{m['id']}"},
+                         {"text": "Reject", "callback_data": f"mem:reject:{m['id']}"}])
+    text = body("<b>Alert</b>", esc(msg["text"]), card, footnotes(msg["citations"]), status)
+    return text, rows + source_rows(msg["citations"])
+
+
 def render(msg, person):
     """One Brain message → list of (html_text, button_rows) Telegram messages."""
+    if msg["kind"] == "alert" and len(msg.get("actions", [])) + len(msg.get("memory_items", [])) == 1:
+        return [render_alert_with_card(msg, person)]
     header = {"brief": "<b>Morning brief</b>", "alert": "<b>Alert</b>"}.get(msg["kind"])
     rows = source_rows(msg["citations"])
-    if msg["kind"] == "brief":
-        rows = [[{"text": "🔊 Listen to the brief", "callback_data": "brief:audio"}]] + rows
     parts = [(body(header, esc(msg["text"]), footnotes(msg["citations"])), rows)]
     parts += [render_action(a, person) for a in msg.get("actions", [])]
     parts += [render_memory(m) for m in msg.get("memory_items", [])]
@@ -306,18 +350,28 @@ def deliver(chat_id, person):
     if r.status_code != 200:
         log(f"GET /state for {person}: {r.status_code} {detail(r)}")
         return
-    for msg in r.json().get("thread", []):
-        if msg.get("from") != "brain" or msg.get("kind") not in ("brief", "alert"):
-            continue
-        with lock:
-            chat = state["chats"].get(chat_id)
-            if not chat or chat["person"] != person or msg["id"] in chat["sent"]:
-                continue
-            chat["sent"].append(msg["id"])  # mark first: never send the same message twice
+    brain = [m for m in r.json().get("thread", [])
+             if m.get("from") == "brain" and m.get("kind") in ("brief", "alert")]
+    with lock:
+        chat = state["chats"].get(chat_id)
+        if not chat or chat["person"] != person:
+            return
+        if chat.get("fresh"):
+            # T7: a chat that has just been tied gets nothing already in the thread.
+            chat["sent"], chat["fresh"] = [m["id"] for m in brain], False
             save_state()
+            log(f"chat {chat_id}: {len(brain)} existing messages of {person} marked as sent")
+            return
+        new = [m for m in brain if m["id"] not in chat["sent"]]
+        if new:
+            chat["sent"] += [m["id"] for m in new]  # mark first: never send the same message twice
+            save_state()
+    for msg in new:
         log(f"sending {msg['kind']} {msg['id']} to {person}")
         for text, rows in render(msg, person):
             send(chat_id, text, rows)
+        if msg["kind"] == "brief":
+            send_brief_voice(chat_id, person)
 
 
 def poll_forever():
@@ -352,12 +406,16 @@ def on_who(chat_id, message, person_id):
     if not person:
         return "Unknown person."
     with lock:
-        # A chat that has just been tied receives what is already in the thread.
-        state["chats"][str(chat_id)] = {"person": person_id, "sent": []}
+        # "fresh": the next look at the thread marks everything in it as sent (T7).
+        state["chats"][str(chat_id)] = {"person": person_id, "sent": [], "fresh": True}
         save_state()
     tg("editMessageText", chat_id=chat_id, message_id=message["message_id"],
        text=f"You are {person['name']} ({person['title']}). Send /start to change.")
     log(f"chat {chat_id} tied to {person_id}")
+    try:
+        deliver(str(chat_id), person_id)  # mark the thread now; if the backend is down, the poller does it
+    except BackendDown:
+        pass
     return None
 
 
@@ -421,24 +479,29 @@ def on_source(chat_id, person, source_id):
         send(chat_id, render_source(r.json()))
 
 
-# T5: listen to the brief
-def on_audio(chat_id, person):
+# T8: the brief's voice follows its text at once. If the audio fails, the text alone stays.
+def send_brief_voice(chat_id, person):
     tg("sendChatAction", chat_id=chat_id, action="upload_voice")
-    r = api("GET", "/brief/audio", person)
-    if r.status_code == 503:
-        send(chat_id, "Voice is not configured.")
+    try:
+        r = api("GET", "/brief/audio", person)
+    except BackendDown:
+        log(f"brief audio for {person}: backend unreachable, text only")
         return
     if r.status_code != 200:
-        send(chat_id, esc(detail(r)))
+        log(f"brief audio for {person}: {r.status_code} {detail(r)}, text only")
         return
     audio = ("brief.mp3", r.content, r.headers.get("content-type", "audio/mpeg"))
-    if tg("sendVoice", chat_id=chat_id, files={"voice": audio}) is None:
-        if tg("sendAudio", chat_id=chat_id, title="Morning brief", files={"audio": audio}) is None:
-            send(chat_id, "Telegram refused the audio file.")
+    sent = tg("sendVoice", chat_id=chat_id, files={"voice": audio})
+    if sent is None:
+        sent = tg("sendAudio", chat_id=chat_id, title="Morning brief", files={"audio": audio})
+    if sent is None:
+        log(f"brief audio for {person}: Telegram refused it, text only")
+    remember(chat_id, sent)
 
 
 def on_message(message):
     chat_id = message["chat"]["id"]
+    remember(chat_id, message)
     text = (message.get("text") or "").strip()
     try:
         if text.split("@")[0] == "/start" or text.startswith("/start "):
@@ -469,10 +532,6 @@ def on_callback(query):
             notice = on_decide(chat_id, message, person, data)
         elif data.startswith("src:"):
             on_source(chat_id, person, data[4:])
-        elif data == "brief:audio":
-            tg("answerCallbackQuery", callback_query_id=query["id"], text="Preparing the audio…")
-            on_audio(chat_id, person)
-            return
         else:
             notice = "Unknown button."
     except BackendDown:
@@ -500,6 +559,9 @@ def main():
     if not me:
         raise SystemExit("Telegram refused the token (or is unreachable).")
     log(f"bot @{me['username']} running, backend {BACKEND_URL}")
+    # A new demo: drop taps and texts sent while the bot was off, and wipe the old chats.
+    tg("deleteWebhook", drop_pending_updates=True)
+    wipe_chats()
     threading.Thread(target=poll_forever, daemon=True).start()
     pool = ThreadPoolExecutor(max_workers=8)
     offset = None

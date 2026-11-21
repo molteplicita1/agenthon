@@ -36,19 +36,26 @@ def test_luca_cannot_approve_act_golive(c):  # rule 6
     assert overview(c)["outbox"] == []
 
 
-def test_proposed_item_only_in_its_leads_brief(c):  # rules 2 and 7
+def test_brief_embeds_no_cards(c):  # section 11
     for pid in ("sara", "giulia", "marco", "luca"):
         thread = c.get("/state", headers=H(pid)).json()["thread"]
         assert len(thread) == 1 and thread[0]["kind"] == "brief"
-        mems = {m["id"] for m in thread[0]["memory_items"]}
+        assert thread[0]["actions"] == [] and thread[0]["memory_items"] == []
         text = thread[0]["text"]
-        if pid == "giulia":
-            assert mems == {"mem_pg", "mem_azure"}
-            assert {a["id"] for a in thread[0]["actions"]} == {"act_golive", "act_key"}
-            assert all(m["can_decide"] for m in thread[0]["memory_items"])
-        else:
-            assert "mem_pg" not in mems and "mem_azure" not in mems
+        assert "below" not in text.lower() and "card" not in text.lower()
+        if pid != "giulia":  # rules 2 and 7: proposals only reach their lead
             assert "PostgreSQL" not in text and "Azure" not in text
+
+
+def test_proposed_item_released_only_to_its_lead(c):  # rules 2 and 7
+    for _ in range(2):
+        c.post("/demo/next-event")
+    for pid in ("sara", "marco", "luca"):
+        assert len(c.get("/state", headers=H(pid)).json()["thread"]) == 1
+    alerts = c.get("/state", headers=H("giulia")).json()["thread"][1:]
+    assert [m["kind"] for m in alerts] == ["alert"] * 2
+    assert [x["id"] for m in alerts for x in m["actions"] + m["memory_items"]] == ["act_golive", "mem_pg"]
+    assert all(x["can_decide"] for m in alerts for x in m["memory_items"])
 
 
 def test_approve_golive_changes_task_and_outbox(c):  # rule 6
@@ -58,9 +65,10 @@ def test_approve_golive_changes_task_and_outbox(c):  # rule 6
     out = overview(c)["outbox"]
     assert len(out) == 1 and out[0]["to"] == "#tech" and out[0]["action_id"] == "act_golive"
     assert c.post("/actions/act_golive/approve", headers=H("giulia")).status_code == 409
-    # the brief embeds the action with its current status
-    brief = c.get("/state", headers=H("giulia")).json()["thread"][0]
-    assert next(a for a in brief["actions"] if a["id"] == "act_golive")["status"] == "approved"
+    # a later release embeds the action with its current status
+    c.post("/demo/next-event")
+    alert = c.get("/state", headers=H("giulia")).json()["thread"][-1]
+    assert alert["actions"][0]["id"] == "act_golive" and alert["actions"][0]["status"] == "approved"
 
 
 def test_reject_changes_nothing(c):  # rule 6

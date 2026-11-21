@@ -25,7 +25,7 @@ from llm import LLMError  # noqa: E402
 app = FastAPI(title="Company Brain")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"],
                    allow_methods=["*"], allow_headers=["*"])
-store.load_or_init(brief.make_briefs)
+store.load_or_init()
 
 
 def me(x_user_id: str | None) -> dict:
@@ -159,14 +159,17 @@ def overview():
             "outbox": st["outbox"],
             "memory": [store.render_memory(st, m, None) for m in st["memory"]],
             "last_event": st["last_event"],
-            "remaining_events": len(st["incoming"]),
+            "remaining_events": {t: watcher.remaining(st, t) for t in st["script"]},
+            "next_step": {t: watcher.describe(st, t) for t in st["script"]},
         }
 
 
 @app.post("/demo/next-event")
-def next_event():
+def next_event(track: str = "tech"):
+    if track not in store.TRACKS:
+        raise HTTPException(404, f"Unknown track {track!r}. Use tech or finance.")
     try:
-        return watcher.next_event()
+        return watcher.next_event(track)
     except LLMError as e:
         raise HTTPException(503, f"The model is not available: {e}")
 

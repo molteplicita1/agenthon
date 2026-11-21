@@ -320,7 +320,7 @@
     "title": "#finance",
     "author": "Elena Rota",
     "timestamp": "2026-11-23T11:45:00",
-    "body": "Elena: Kestrel invoice 2026-031 still not paid\nLuca: that's over a week late. They promised the 16th\nElena: shall I send the formal reminder?\nLuca: let me ask Sara to nudge them first, then the formal reminder",
+    "body": "Elena: bank reconciliation done up to Friday 20 Nov\nElena: every November payment is matched except Kestrel Freight, invoice 2026-031",
     "team": "finance",
     "visible_to": [
       "finance"

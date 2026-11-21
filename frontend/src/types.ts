@@ -42,6 +42,7 @@ export interface MemoryItem {
   decided_by: string | null;
   decided_at: string | null;
   can_decide: boolean;
+  caught: string[];
 }
 
 export type Effect =
@@ -75,8 +76,16 @@ export interface Overview {
   outbox: OutboxMessage[];
   memory: MemoryItem[];
   last_event: Source | null;
-  remaining_events: number;
+  remaining_events: Record<Track, number>;
+  next_step: Record<Track, string | null>;
 }
+
+/** The two demo buttons: one script for the Tech Lead, one for the Finance Manager. */
+export type Track = "tech" | "finance";
+export const TRACKS: Array<{ id: Track; label: string }> = [
+  { id: "tech", label: "Simulate tech event" },
+  { id: "finance", label: "Simulate finance event" },
+];
 
 export interface NextEventResponse {
   event: Source | null;
