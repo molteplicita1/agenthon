@@ -1,0 +1,12 @@
+[
+  {
+    "id": "src_pr_mongo",
+    "type": "pr",
+    "title": "Add MongoDB store for Alpilog reports",
+    "author": "Marco Riva",
+    "timestamp": "2026-11-24T09:00:00",
+    "body": "Description: adds a MongoDB collection that stores pre-aggregated shipment and invoice reports for Alpilog, so the reporting page can read them without running the heavy queries each time.\nState: open\nReviewers: Giulia Ferri\nFiles changed: 6 (+312 / -14)",
+    "team": "tech",
+    "visible_to": ["tech"]
+  }
+]

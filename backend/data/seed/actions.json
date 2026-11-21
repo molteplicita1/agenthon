@@ -1,0 +1,118 @@
+[
+  {
+    "id": "act_golive",
+    "title": "Move 'Alpilog – API migration' to 2 Dec and notify #tech",
+    "reason": "Alpilog go-live moved to 4 Dec, but this task is due 9 Dec.",
+    "for_user": "giulia",
+    "status": "pending",
+    "effects": [
+      {
+        "type": "update_task",
+        "task_id": "task_api_migration",
+        "changes": {
+          "due_date": "2026-12-02"
+        }
+      },
+      {
+        "type": "send_message",
+        "to": "#tech",
+        "text": "Heads-up: Alpilog go-live moved to 4 Dec. API migration is now due 2 Dec."
+      }
+    ],
+    "cites": [
+      {
+        "source_id": "src_email_golive",
+        "quote": "bring the go-live forward to 4 December"
+      },
+      {
+        "source_id": "task_api_migration",
+        "quote": null
+      }
+    ],
+    "created_at": "2026-11-23T17:06:00",
+    "decided_at": null
+  },
+  {
+    "id": "act_key",
+    "title": "Create task 'Rotate staging API key' for Marco, due 27 Nov",
+    "reason": "Marco said on Monday he would rotate the staging API key by Friday, but no task tracks it.",
+    "for_user": "giulia",
+    "status": "pending",
+    "effects": [
+      {
+        "type": "create_task",
+        "title": "Rotate staging API key",
+        "assignee": "marco",
+        "due_date": "2026-11-27"
+      }
+    ],
+    "cites": [
+      {
+        "source_id": "src_chat_key",
+        "quote": "I will rotate the staging API key by Friday"
+      }
+    ],
+    "created_at": "2026-11-23T11:20:00",
+    "decided_at": null
+  },
+  {
+    "id": "act_flaky",
+    "title": "Move 'Fix flaky export tests' to 27 Nov",
+    "reason": "You said you need until Friday to fix the flaky tests, but the task is due Wednesday 25 Nov.",
+    "for_user": "marco",
+    "status": "pending",
+    "effects": [
+      {
+        "type": "update_task",
+        "task_id": "task_flaky_tests",
+        "changes": {
+          "due_date": "2026-11-27"
+        }
+      }
+    ],
+    "cites": [
+      {
+        "source_id": "src_chat_flaky",
+        "quote": "I need until Friday to fix it properly"
+      },
+      {
+        "source_id": "task_flaky_tests",
+        "quote": null
+      }
+    ],
+    "created_at": "2026-11-23T15:45:00",
+    "decided_at": null
+  },
+  {
+    "id": "act_kestrel",
+    "title": "Ask Sara to nudge Kestrel Freight and plan the formal reminder",
+    "reason": "Kestrel Freight invoice 2026-031 is over a week late and they had promised payment by 16 Nov.",
+    "for_user": "luca",
+    "status": "pending",
+    "effects": [
+      {
+        "type": "send_message",
+        "to": "sara",
+        "text": "Kestrel Freight invoice 2026-031 is over a week late. Could you nudge Martina before I send the formal reminder?"
+      },
+      {
+        "type": "create_task",
+        "title": "Send formal reminder to Kestrel Freight",
+        "assignee": "luca",
+        "due_date": "2026-11-26"
+      }
+    ],
+    "cites": [
+      {
+        "source_id": "src_chat_kestrel",
+        "quote": "that's over a week late"
+      },
+      {
+        "source_id": "src_email_kestrel_pay",
+        "quote": "Payment should go out by 16 November at the latest"
+      }
+    ],
+    "created_at": "2026-11-23T12:00:00",
+    "decided_at": null
+  }
+]

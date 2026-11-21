@@ -1,0 +1,6 @@
+[
+  {"id": "sara", "name": "Sara Conti", "team": "sales", "is_lead": true, "title": "Head of Sales"},
+  {"id": "giulia", "name": "Giulia Ferri", "team": "tech", "is_lead": true, "title": "Tech Lead"},
+  {"id": "marco", "name": "Marco Riva", "team": "tech", "is_lead": false, "title": "Backend Developer"},
+  {"id": "luca", "name": "Luca Moretti", "team": "finance", "is_lead": true, "title": "Finance Manager"}
+]

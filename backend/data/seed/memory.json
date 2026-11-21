@@ -1,0 +1,328 @@
+[
+  {
+    "id": "mem_golive",
+    "statement": "Alpilog go-live moved from 11 Dec to 4 Dec 2026.",
+    "team": "sales",
+    "visible_to": [
+      "all"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_email_golive",
+        "quote": "bring the go-live forward to 4 December"
+      }
+    ],
+    "created_at": "2026-11-23T16:55:00",
+    "decided_by": "sara",
+    "decided_at": "2026-11-23T17:05:00"
+  },
+  {
+    "id": "mem_pg",
+    "statement": "For Alpilog we chose PostgreSQL over MongoDB because reporting needs joins across shipments and invoices.",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ],
+    "status": "proposed",
+    "cites": [
+      {
+        "source_id": "src_chat_pg",
+        "quote": "reporting needs joins across shipments and invoices"
+      }
+    ],
+    "created_at": "2026-11-23T10:25:00",
+    "decided_by": null,
+    "decided_at": null
+  },
+  {
+    "id": "mem_azure",
+    "statement": "Brightloop will migrate from AWS to Azure in 2027.",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ],
+    "status": "proposed",
+    "cites": [
+      {
+        "source_id": "src_chat_azure",
+        "quote": "the company will move from AWS to Azure next year"
+      }
+    ],
+    "created_at": "2026-11-23T13:40:00",
+    "decided_by": null,
+    "decided_at": null
+  },
+  {
+    "id": "mem_contract",
+    "statement": "The Alpilog contract for 2026 is worth €84,000, invoiced in three milestones.",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_doc_contract",
+        "quote": "€84,000, invoiced in three milestones"
+      }
+    ],
+    "created_at": "2026-11-10T09:15:00",
+    "decided_by": "luca",
+    "decided_at": "2026-11-10T09:40:00"
+  },
+  {
+    "id": "mem_pr_review",
+    "statement": "Every pull request needs one approval from a teammate before it is merged.",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_doc_onboarding",
+        "quote": "every pull request needs one approval from a teammate before it is merged"
+      }
+    ],
+    "created_at": "2026-11-09T10:00:00",
+    "decided_by": "giulia",
+    "decided_at": "2026-11-09T10:20:00"
+  },
+  {
+    "id": "mem_friday_freeze",
+    "statement": "No production deploys after 15:00 on Fridays, because nobody wants to debug at the weekend.",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_doc_onboarding",
+        "quote": "no production deploys after 15:00 on Fridays, because nobody wants to debug at the weekend"
+      }
+    ],
+    "created_at": "2026-11-09T10:00:00",
+    "decided_by": "giulia",
+    "decided_at": "2026-11-09T10:21:00"
+  },
+  {
+    "id": "mem_core_hours",
+    "statement": "Core hours are 10:00-16:00 and the daily stand-up is at 09:30.",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_doc_onboarding",
+        "quote": "core hours are 10:00-16:00, the daily stand-up is at 09:30"
+      }
+    ],
+    "created_at": "2026-11-09T10:00:00",
+    "decided_by": "giulia",
+    "decided_at": "2026-11-09T10:22:00"
+  },
+  {
+    "id": "mem_tls_renewal",
+    "statement": "TLS certificates are renewed 30 days before they expire, after the expired-certificate outage of 10 Nov.",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_doc_postmortem",
+        "quote": "we renew TLS certificates 30 days before they expire"
+      }
+    ],
+    "created_at": "2026-11-12T16:10:00",
+    "decided_by": "giulia",
+    "decided_at": "2026-11-12T16:20:00"
+  },
+  {
+    "id": "mem_support_sla",
+    "statement": "Client support requests get a first reply within 4 working hours.",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_email_sla",
+        "quote": "every client support request gets a first reply within 4 working hours"
+      }
+    ],
+    "created_at": "2026-11-17T12:10:00",
+    "decided_by": "giulia",
+    "decided_at": "2026-11-17T12:30:00"
+  },
+  {
+    "id": "mem_day_rate",
+    "statement": "The standard 2026 day rate for a developer is €650, excluding VAT.",
+    "team": "sales",
+    "visible_to": [
+      "sales",
+      "finance"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_doc_pricing",
+        "quote": "Backend or frontend developer: €650 per day"
+      }
+    ],
+    "created_at": "2026-11-11T15:10:00",
+    "decided_by": "sara",
+    "decided_at": "2026-11-11T15:30:00"
+  },
+  {
+    "id": "mem_discount_cap",
+    "statement": "Discounts above 10% need approval from Finance.",
+    "team": "sales",
+    "visible_to": [
+      "sales",
+      "finance"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_doc_pricing",
+        "quote": "Anything above 10% needs approval from Luca (finance)"
+      }
+    ],
+    "created_at": "2026-11-11T15:10:00",
+    "decided_by": "sara",
+    "decided_at": "2026-11-11T15:31:00"
+  },
+  {
+    "id": "mem_demo_thursday",
+    "statement": "Client demos are held on Thursdays only, so the tech team can prepare on Wednesday.",
+    "team": "sales",
+    "visible_to": [
+      "all"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_doc_meeting",
+        "quote": "demos are held on Thursdays only, so the tech team can prepare on Wednesday"
+      }
+    ],
+    "created_at": "2026-11-16T11:40:00",
+    "decided_by": "sara",
+    "decided_at": "2026-11-16T12:00:00"
+  },
+  {
+    "id": "mem_case_study",
+    "statement": "Client names are used in case studies only after the client's written OK, because some contracts forbid naming the client.",
+    "team": "sales",
+    "visible_to": [
+      "sales"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_chat_casestudy",
+        "quote": "not before they say yes in writing. Two of our contracts forbid naming the client"
+      }
+    ],
+    "created_at": "2026-11-12T12:40:00",
+    "decided_by": "sara",
+    "decided_at": "2026-11-12T13:00:00"
+  },
+  {
+    "id": "mem_expenses",
+    "statement": "Expense reports must be submitted by the 5th of the following month, otherwise they are paid with the next month's run.",
+    "team": "finance",
+    "visible_to": [
+      "all"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_email_expenses",
+        "quote": "submit your expense report by the 5th of the following month"
+      }
+    ],
+    "created_at": "2026-11-10T09:00:00",
+    "decided_by": "luca",
+    "decided_at": "2026-11-10T09:10:00"
+  },
+  {
+    "id": "mem_invoice_day",
+    "statement": "Client invoices go out on the last working day of the month.",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_chat_invoices",
+        "quote": "invoices go out on the last working day of the month"
+      }
+    ],
+    "created_at": "2026-11-16T10:10:00",
+    "decided_by": "luca",
+    "decided_at": "2026-11-16T10:20:00"
+  },
+  {
+    "id": "mem_late_reminder",
+    "statement": "The first payment reminder to a late client goes out 7 days after the due date.",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_chat_invoices",
+        "quote": "first reminder 7 days after the due date"
+      }
+    ],
+    "created_at": "2026-11-16T10:10:00",
+    "decided_by": "luca",
+    "decided_at": "2026-11-16T10:21:00"
+  },
+  {
+    "id": "mem_office_closed",
+    "statement": "The office is closed on Tuesday 8 December 2026.",
+    "team": "finance",
+    "visible_to": [
+      "all"
+    ],
+    "status": "approved",
+    "cites": [
+      {
+        "source_id": "src_email_office",
+        "quote": "The office will be closed on Tuesday 8 December"
+      }
+    ],
+    "created_at": "2026-11-19T09:30:00",
+    "decided_by": "luca",
+    "decided_at": "2026-11-19T09:45:00"
+  },
+  {
+    "id": "mem_verdello",
+    "statement": "Verdello Retail gets 5% off its 2027 renewal because it has been a client since 2023.",
+    "team": "sales",
+    "visible_to": [
+      "sales"
+    ],
+    "status": "proposed",
+    "cites": [
+      {
+        "source_id": "src_chat_verdello",
+        "quote": "they've been with us since 2023, ok, 5% off the 2027 renewal"
+      }
+    ],
+    "created_at": "2026-11-23T14:20:00",
+    "decided_by": null,
+    "decided_at": null
+  }
+]

@@ -1,0 +1,568 @@
+[
+  {
+    "id": "src_email_golive",
+    "type": "email",
+    "title": "Alpilog go-live date",
+    "author": "Elisa Brandt (Alpilog)",
+    "timestamp": "2026-11-23T16:40:00",
+    "body": "Hi Sara,\n\nQuick update from our side. After this afternoon's steering meeting we need to bring the go-live forward to 4 December instead of 11 December. Our warehouse teams are trained from the first week of December and we would rather not wait.\n\nCan you confirm that this works for Brightloop?\n\nThanks,\nElisa Brandt\nProject Manager, Alpilog",
+    "team": "sales",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_chat_key",
+    "type": "chat",
+    "title": "#tech",
+    "author": "Marco Riva",
+    "timestamp": "2026-11-23T11:12:00",
+    "body": "Davide: the staging login keeps failing for the demo build\nMarco: yeah the old one expired, I will rotate the staging API key by Friday\nDavide: great, ping me when it's done",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_chat_pg",
+    "type": "chat",
+    "title": "#tech",
+    "author": "Giulia Ferri",
+    "timestamp": "2026-11-23T10:15:00",
+    "body": "Giulia: so for the Alpilog reports, which store do we go with?\nMarco: PostgreSQL over MongoDB for me. reporting needs joins across shipments and invoices\nGiulia: agreed, with MongoDB we would rebuild those joins in code\nMarco: exactly. I'll start on the schema this week\nGiulia: ok, decided then",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_chat_azure",
+    "type": "chat",
+    "title": "#random",
+    "author": "Marco Riva",
+    "timestamp": "2026-11-23T13:30:00",
+    "body": "Marco: breaking news, the company will move from AWS to Azure next year\nChiara: who told you that?\nMarco: nobody, cloud credits just sound nice\nDavide: I'll believe it when I see the invoice",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_doc_contract",
+    "type": "doc",
+    "title": "Alpilog – contract summary 2026",
+    "author": "Luca Moretti",
+    "timestamp": "2026-11-09T11:00:00",
+    "body": "Client: Alpilog (logistics), contact Elisa Brandt\nScope: API migration, reporting for shipments and invoices, go-live support\nTotal value: €84,000, invoiced in three milestones\nMilestones: 1) kickoff and data model, 2) API migration, 3) reporting and go-live\nPayment terms: 30 days from invoice date\nOwner: Luca Moretti (finance), Sara Conti (sales)",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ]
+  },
+  {
+    "id": "task_api_migration",
+    "type": "task",
+    "title": "Alpilog – API migration",
+    "author": "Giulia Ferri",
+    "timestamp": "2026-11-12T09:30:00",
+    "body": "Move the Alpilog shipment and invoice endpoints to the new service and retire the old ones. Owner: Giulia. Nothing is blocking it right now.",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ],
+    "assignee": "giulia",
+    "due_date": "2026-12-09",
+    "status": "in_progress"
+  },
+  {
+    "id": "src_email_kickoff",
+    "type": "email",
+    "title": "Re: schedule for the next weeks",
+    "author": "Elisa Brandt (Alpilog)",
+    "timestamp": "2026-11-09T14:20:00",
+    "body": "Hi Sara,\n\nThanks for the call this morning. As discussed, our plan is go-live on 11 December, with user acceptance testing the week before. We will send the list of test accounts next week.\n\nBest,\nElisa",
+    "team": "sales",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_email_kestrel_pay",
+    "type": "email",
+    "title": "Invoice 2026-031",
+    "author": "Martina Gallo (Kestrel Freight)",
+    "timestamp": "2026-11-12T10:05:00",
+    "body": "Hello Luca,\n\nWe received invoice 2026-031 and it is in our approval queue. Payment should go out by 16 November at the latest.\n\nKind regards,\nMartina Gallo\nAccounts, Kestrel Freight",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ]
+  },
+  {
+    "id": "src_email_verdello",
+    "type": "email",
+    "title": "Renewal for 2027",
+    "author": "Paola Neri (Verdello Retail)",
+    "timestamp": "2026-11-18T15:10:00",
+    "body": "Hi Sara,\n\nWe would like to renew for 2027. Our budget is tight this year, is there any chance of a small discount on the renewal? We have been with you since 2023.\n\nThanks,\nPaola Neri\nOperations, Verdello Retail",
+    "team": "sales",
+    "visible_to": [
+      "sales"
+    ]
+  },
+  {
+    "id": "src_email_expenses",
+    "type": "email",
+    "title": "Expense reports reminder",
+    "author": "Luca Moretti",
+    "timestamp": "2026-11-10T08:50:00",
+    "body": "Hi all,\n\nA reminder about expenses: please submit your expense report by the 5th of the following month, with receipts attached. Reports sent later are paid with the next month's run, so a late one slips by four weeks.\n\nThanks,\nLuca",
+    "team": "finance",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_email_pinecrest",
+    "type": "email",
+    "title": "Order confirmation 4471",
+    "author": "Pinecrest Office Supplies",
+    "timestamp": "2026-11-13T09:45:00",
+    "body": "Hello,\n\nYour order of 2 monitors and 12 notebooks is confirmed. Delivery is expected on 20 November. The invoice will follow by email.\n\nPinecrest Office Supplies",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ]
+  },
+  {
+    "id": "src_email_harbor",
+    "type": "email",
+    "title": "Meeting room booking",
+    "author": "Harbor Coworking",
+    "timestamp": "2026-11-16T11:30:00",
+    "body": "Dear Sara,\n\nYour booking of the Cedar meeting room on Thursday 26 November, 14:00-16:00, is confirmed. Let us know if you need a projector.\n\nHarbor Coworking",
+    "team": "sales",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_email_sla",
+    "type": "email",
+    "title": "Support reply times",
+    "author": "Giulia Ferri",
+    "timestamp": "2026-11-17T12:00:00",
+    "body": "Hi team,\n\nAfter the complaint last week: from now on every client support request gets a first reply within 4 working hours, even if it is only 'we are on it'. Silence is what annoys clients most.\n\nGiulia",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_email_office",
+    "type": "email",
+    "title": "Office closed on 8 December",
+    "author": "Elena Rota",
+    "timestamp": "2026-11-19T09:20:00",
+    "body": "Hi everyone,\n\nThe office will be closed on Tuesday 8 December for the public holiday. Please plan your work around it.\n\nElena",
+    "team": "finance",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_email_uat",
+    "type": "email",
+    "title": "Test accounts for acceptance testing",
+    "author": "Elisa Brandt (Alpilog)",
+    "timestamp": "2026-11-17T10:30:00",
+    "body": "Hi Sara,\n\nAs promised, here is who needs a test account at Alpilog: me, two warehouse supervisors and one finance clerk. Can your team set them up before testing starts?\n\nThanks,\nElisa",
+    "team": "sales",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_email_orsa",
+    "type": "email",
+    "title": "Request for a quote",
+    "author": "Davide Marini (Orsa Mobility)",
+    "timestamp": "2026-11-20T16:15:00",
+    "body": "Hello,\n\nWe are a small mobility start-up in Bologna and we need our booking platform rebuilt. Could we have a call next week?\n\nDavide Marini\nCTO, Orsa Mobility",
+    "team": "sales",
+    "visible_to": [
+      "sales"
+    ]
+  },
+  {
+    "id": "src_email_audit",
+    "type": "email",
+    "title": "Annual audit: documents needed",
+    "author": "Franca Ferraro (Studio Ferraro)",
+    "timestamp": "2026-11-19T14:00:00",
+    "body": "Dear Luca,\n\nFor the annual audit please send us the 2026 supplier contracts, the December bank statements and the fixed-asset register by 15 January.\n\nBest regards,\nFranca Ferraro",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ]
+  },
+  {
+    "id": "src_chat_flaky",
+    "type": "chat",
+    "title": "#tech",
+    "author": "Marco Riva",
+    "timestamp": "2026-11-23T15:40:00",
+    "body": "Marco: the export tests are flaky again on CI, they pass locally\nPaolo: it's the timezone thing, the runner is in UTC\nMarco: ugh. I need until Friday to fix it properly, Wednesday is too tight\nGiulia: ok, tell me if it blocks the release",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_chat_tls",
+    "type": "chat",
+    "title": "#tech",
+    "author": "Davide Greco",
+    "timestamp": "2026-11-10T08:40:00",
+    "body": "Davide: the login page shows a certificate error for everyone\nGiulia: the certificate expired last night, renewing it now\nPaolo: nobody got an alert?\nGiulia: no. I'll write it up and fix the process",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_chat_review",
+    "type": "chat",
+    "title": "#tech",
+    "author": "Davide Greco",
+    "timestamp": "2026-11-16T17:20:00",
+    "body": "Davide: can someone look at my PR today?\nGiulia: I'll do it after the stand-up tomorrow\nMarco: I merged mine without a second look yesterday, sorry, it was a hotfix\nGiulia: let's not, one approval minimum, even for hotfixes",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_chat_ci",
+    "type": "chat",
+    "title": "#tech",
+    "author": "Paolo Serra",
+    "timestamp": "2026-11-18T10:50:00",
+    "body": "Paolo: CI takes 14 minutes now\nDavide: it was 6 last month\nGiulia: I'll look at caching on Thursday\nPaolo: thanks, I'm drinking too much coffee waiting",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_chat_verdello",
+    "type": "chat",
+    "title": "#sales",
+    "author": "Sara Conti",
+    "timestamp": "2026-11-23T14:10:00",
+    "body": "Anna: Verdello asked for a discount on the 2027 renewal\nSara: they've been with us since 2023, ok, 5% off the 2027 renewal, nothing more\nAnna: great, I'll tell Paola\nSara: put it in the proposal so we don't forget",
+    "team": "sales",
+    "visible_to": [
+      "sales"
+    ]
+  },
+  {
+    "id": "src_chat_orsa",
+    "type": "chat",
+    "title": "#sales",
+    "author": "Anna Vitale",
+    "timestamp": "2026-11-20T16:40:00",
+    "body": "Anna: new inbound from Orsa Mobility, a mobility start-up in Bologna\nSara: small budget probably, but let's take the call\nAnna: booking it for next week",
+    "team": "sales",
+    "visible_to": [
+      "sales"
+    ]
+  },
+  {
+    "id": "src_chat_casestudy",
+    "type": "chat",
+    "title": "#sales",
+    "author": "Anna Vitale",
+    "timestamp": "2026-11-12T12:30:00",
+    "body": "Anna: can I put Kestrel Freight in the new case study?\nSara: not before they say yes in writing. Two of our contracts forbid naming the client\nAnna: ok, I'll ask them first",
+    "team": "sales",
+    "visible_to": [
+      "sales"
+    ]
+  },
+  {
+    "id": "src_chat_pipeline",
+    "type": "chat",
+    "title": "#sales",
+    "author": "Sara Conti",
+    "timestamp": "2026-11-17T09:40:00",
+    "body": "Sara: pipeline review at 10, bring your numbers\nAnna: Tommaso is out sick today\nSara: ok, we'll go through his deals without him",
+    "team": "sales",
+    "visible_to": [
+      "sales"
+    ]
+  },
+  {
+    "id": "src_chat_invoices",
+    "type": "chat",
+    "title": "#finance",
+    "author": "Luca Moretti",
+    "timestamp": "2026-11-16T10:00:00",
+    "body": "Luca: reminder for next week: invoices go out on the last working day of the month\nElena: and if a client is late?\nLuca: first reminder 7 days after the due date, then I call them",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ]
+  },
+  {
+    "id": "src_chat_kestrel",
+    "type": "chat",
+    "title": "#finance",
+    "author": "Elena Rota",
+    "timestamp": "2026-11-23T11:45:00",
+    "body": "Elena: Kestrel invoice 2026-031 still not paid\nLuca: that's over a week late. They promised the 16th\nElena: shall I send the formal reminder?\nLuca: let me ask Sara to nudge them first, then the formal reminder",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ]
+  },
+  {
+    "id": "src_chat_lunch",
+    "type": "chat",
+    "title": "#random",
+    "author": "Chiara Bellini",
+    "timestamp": "2026-11-20T12:10:00",
+    "body": "Chiara: pizza or ramen for Friday lunch?\nDavide: ramen\nChiara: ramen it is\nPaolo: I'm in",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_chat_coffee",
+    "type": "chat",
+    "title": "#random",
+    "author": "Elena Rota",
+    "timestamp": "2026-11-17T08:45:00",
+    "body": "Elena: the coffee machine is broken again\nPaolo: did you try turning it off and on?\nElena: it's a coffee machine Paolo\nPaolo: worth a shot",
+    "team": "finance",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "task_flaky_tests",
+    "type": "task",
+    "title": "Fix flaky export tests",
+    "author": "Marco Riva",
+    "timestamp": "2026-11-18T14:00:00",
+    "body": "The export tests fail at random on CI because the runner is in UTC. Make them independent from the timezone.",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ],
+    "assignee": "marco",
+    "due_date": "2026-11-25",
+    "status": "in_progress"
+  },
+  {
+    "id": "task_pricing_2027",
+    "type": "task",
+    "title": "Draft 2027 pricing sheet",
+    "author": "Sara Conti",
+    "timestamp": "2026-11-16T12:00:00",
+    "body": "Update the day rates for 2027 and check the discount rules with Luca.",
+    "team": "sales",
+    "visible_to": [
+      "sales",
+      "finance"
+    ],
+    "assignee": "sara",
+    "due_date": "2026-11-30",
+    "status": "todo"
+  },
+  {
+    "id": "task_nov_invoicing",
+    "type": "task",
+    "title": "Prepare November invoicing run",
+    "author": "Luca Moretti",
+    "timestamp": "2026-11-16T10:30:00",
+    "body": "Check delivered work with Sara and Giulia, then send the invoices on the last working day.",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ],
+    "assignee": "luca",
+    "due_date": "2026-11-30",
+    "status": "in_progress"
+  },
+  {
+    "id": "task_alpilog_uat",
+    "type": "task",
+    "title": "Alpilog – acceptance testing environment",
+    "author": "Giulia Ferri",
+    "timestamp": "2026-11-17T11:00:00",
+    "body": "Set up the test environment and the test accounts Alpilog asked for.",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ],
+    "assignee": "marco",
+    "due_date": "2026-12-01",
+    "status": "todo"
+  },
+  {
+    "id": "task_verdello_proposal",
+    "type": "task",
+    "title": "Verdello Retail – 2027 renewal proposal",
+    "author": "Sara Conti",
+    "timestamp": "2026-11-18T16:00:00",
+    "body": "Write the renewal proposal for Verdello Retail and send it to Paola Neri.",
+    "team": "sales",
+    "visible_to": [
+      "sales"
+    ],
+    "assignee": "sara",
+    "due_date": "2026-11-27",
+    "status": "in_progress"
+  },
+  {
+    "id": "task_cert_reminders",
+    "type": "task",
+    "title": "Set up certificate expiry reminders",
+    "author": "Giulia Ferri",
+    "timestamp": "2026-11-12T16:30:00",
+    "body": "Calendar reminders 30 days before every certificate expires, as agreed in the postmortem.",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ],
+    "assignee": "giulia",
+    "due_date": "2026-11-13",
+    "status": "done"
+  },
+  {
+    "id": "task_audit_docs",
+    "type": "task",
+    "title": "Collect documents for the annual audit",
+    "author": "Luca Moretti",
+    "timestamp": "2026-11-19T14:30:00",
+    "body": "Gather the supplier contracts, the December bank statements and the fixed-asset register for Studio Ferraro.",
+    "team": "finance",
+    "visible_to": [
+      "finance"
+    ],
+    "assignee": "luca",
+    "due_date": "2027-01-15",
+    "status": "todo"
+  },
+  {
+    "id": "src_doc_postmortem",
+    "type": "doc",
+    "title": "Postmortem – expired certificate, 10 Nov",
+    "author": "Giulia Ferri",
+    "timestamp": "2026-11-12T16:00:00",
+    "body": "What happened: on Tuesday 10 Nov the TLS certificate of the client portal expired overnight. The login page showed an error from 07:30 to 09:10.\nCause: nobody owned the renewal and there was no alert.\nFix: certificate renewed at 09:10.\nDecision: we renew TLS certificates 30 days before they expire, with a reminder in the team calendar, so this cannot happen again.\nFollow-up: task 'Set up certificate expiry reminders'.",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_doc_pricing",
+    "type": "doc",
+    "title": "Pricing sheet 2026",
+    "author": "Sara Conti",
+    "timestamp": "2026-11-11T15:00:00",
+    "body": "Standard day rates 2026 (excl. VAT):\n- Backend or frontend developer: €650 per day\n- Tech lead: €800 per day\n- Designer: €600 per day\nDiscounts: up to 10% on a yearly commitment. Anything above 10% needs approval from Luca (finance), no exceptions.",
+    "team": "sales",
+    "visible_to": [
+      "sales",
+      "finance"
+    ]
+  },
+  {
+    "id": "src_doc_onboarding",
+    "type": "doc",
+    "title": "Onboarding notes – new joiners",
+    "author": "Giulia Ferri",
+    "timestamp": "2026-11-09T09:30:00",
+    "body": "Welcome to Brightloop!\n\nWorking hours: core hours are 10:00-16:00, the daily stand-up is at 09:30 in #tech.\nCode: every pull request needs one approval from a teammate before it is merged.\nReleases: no production deploys after 15:00 on Fridays, because nobody wants to debug at the weekend.\nLaptop: pick it up at the front desk on your first day.\nQuestions: ask in #tech, nobody bites.",
+    "team": "tech",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_doc_meeting",
+    "type": "doc",
+    "title": "Meeting notes – sales and delivery sync, 16 Nov",
+    "author": "Sara Conti",
+    "timestamp": "2026-11-16T11:30:00",
+    "body": "Attendees: Sara, Giulia, Luca, Anna\n1. Client demos: demos are held on Thursdays only, so the tech team can prepare on Wednesday.\n2. Alpilog: acceptance testing in the week before go-live, Elisa sends the test accounts.\n3. Pipeline: two renewals and one inbound lead.\nActions: Anna books the room, Sara writes to the clients.",
+    "team": "sales",
+    "visible_to": [
+      "all"
+    ]
+  },
+  {
+    "id": "src_pr_retry",
+    "type": "pr",
+    "title": "Add retry with backoff to the nightly export job",
+    "author": "Davide Greco",
+    "timestamp": "2026-11-12T17:40:00",
+    "body": "Description: the nightly export now retries three times with exponential backoff before it raises an alert.\nState: merged\nReviewers: Giulia Ferri, Paolo Serra",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_pr_pagination",
+    "type": "pr",
+    "title": "Fix pagination on the shipments endpoint",
+    "author": "Marco Riva",
+    "timestamp": "2026-11-18T16:00:00",
+    "body": "Description: the last page returned duplicates when the page size did not divide the total. Added a stable sort and a regression test.\nState: open\nReviewers: Davide Greco",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_pr_fastapi",
+    "type": "pr",
+    "title": "Bump FastAPI to the latest minor version",
+    "author": "Giulia Ferri",
+    "timestamp": "2026-11-13T11:20:00",
+    "body": "Description: routine dependency bump, no code changes needed.\nState: merged\nReviewers: Marco Riva",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_pr_health",
+    "type": "pr",
+    "title": "Add /health route for uptime checks",
+    "author": "Davide Greco",
+    "timestamp": "2026-11-17T15:30:00",
+    "body": "Description: a small route that returns ok, used by the uptime monitor.\nState: merged\nReviewers: Giulia Ferri",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  },
+  {
+    "id": "src_pr_invoicepdf",
+    "type": "pr",
+    "title": "Refactor invoice PDF generation",
+    "author": "Davide Greco",
+    "timestamp": "2026-11-23T17:10:00",
+    "body": "Description: splits the PDF layout from the data code, so a template change no longer touches the billing logic.\nState: open\nReviewers: Marco Riva, Giulia Ferri",
+    "team": "tech",
+    "visible_to": [
+      "tech"
+    ]
+  }
+]
