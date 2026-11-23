@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="BrightLoop logo">
+  <title>BrightLoop</title>
+  <rect width="120" height="120" rx="28" fill="#0071e3"/>
+  <path d="M41.9 36 A30 30 0 0 1 89.5 54.8 M78.1 84 A30 30 0 0 1 30.5 65.2" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/>
+  <path d="M97.7 52.3 L91.4 65.1 L81 55.3 Z M22.3 67.7 L28.6 54.9 L39 64.7 Z" fill="#fff" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M48 61 L56 69.5 L72 51" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

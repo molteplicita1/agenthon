@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.svg" width="112" alt="BrightLoop logo: two arrows closing a loop around a check mark"></p>
+
 # BrightLoop
 
 **A linter for company decisions.**
