@@ -1,6 +1,6 @@
 """Company Brain — Telegram bot.
 
-A thin adapter over the backend API (CONTRACT.md section 13).
+A thin adapter over the backend API (docs/plans/contract.md section 13).
 It shows what the backend returns and sends back what people do. No logic of its own.
 """
 
@@ -174,7 +174,7 @@ def wipe_chats():
 
 # ---------- people ----------
 
-# Fallback only, if the backend is down when someone sends /start (CONTRACT.md section 4).
+# Fallback only, if the backend is down when someone sends /start (docs/plans/contract.md section 4).
 PEOPLE = [
     {"id": "sara", "name": "Sara Conti", "team": "sales", "is_lead": True, "title": "Head of Sales"},
     {"id": "giulia", "name": "Giulia Ferri", "team": "tech", "is_lead": True, "title": "Tech Lead"},

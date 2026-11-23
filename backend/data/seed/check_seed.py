@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Standalone check of the seed files (CONTRACT.md sections 9 and 10, DEMO.md traps).
+"""Standalone check of the seed files (docs/plans/contract.md sections 9 and 10, demo-video/demo.md traps).
 Usage: python3 check_seed.py      (run from anywhere)"""
 import json, re, sys
 from pathlib import Path
@@ -147,7 +147,7 @@ need("src_pr_mongo" not in {s["id"] for s in sources}, "src_pr_mongo must not be
 need(incoming and incoming[0]["team"] == "tech" and incoming[0]["visible_to"] == ["tech"]
      and incoming[0]["author"] == "Marco Riva" and "Giulia Ferri" in incoming[0]["body"], "src_pr_mongo fields")
 
-# ---- counts asked by TASKS_DATA (D1)
+# ---- counts asked by docs/plans/tasks/data.md (D1)
 cnt = {k: sum(1 for s in sources if s["type"] == k) for k in ("email", "chat", "task", "doc", "pr")}
 if cnt != {"email": 12, "chat": 15, "task": 8, "doc": 5, "pr": 5}: err(f"source counts differ from plan: {cnt}")
 n_app = sum(1 for m in memory if m["status"] == "approved")

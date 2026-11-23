@@ -1,10 +1,22 @@
+# OS and editors
 .DS_Store
+
+# Secrets
 .env
+
+# Python
 .venv/
 __pycache__/
 .pytest_cache/
+
+# Node
 node_modules/
 dist/
+
+# Runtime state, rebuilt on every start
 backend/data/state.json
 backend/data/audio/
 bot/bot_state.json
+
+# Demo video build output (the committed copy is demo-video/brightloop-demo.mp4)
+demo-video/out/

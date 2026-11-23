@@ -1,4 +1,4 @@
-// Records the DEMO.md script as a video: control room on the left, Giulia's and Luca's phones on the right.
+// Records the demo-video/demo.md script as a video: control room on the left, Giulia's and Luca's phones on the right.
 // Needs the backend (port 8000) and the control room (port 5173) running, freshly started. The bot is not needed.
 //   node record.mjs            → out/frames/*.jpg + out/timeline.json
 //   node assemble.mjs          → out/brightloop-demo.mp4
