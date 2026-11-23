@@ -2,7 +2,7 @@
 
 **A linter for company decisions.**
 
-Company Brain is a prototype built in one day for the "Agentic AI for business" track of a
+BrightLoop is a prototype built in one day for the "Agentic AI for business" track of a
 hackathon. It watches a team's work (emails, chat threads, tasks, docs, pull requests), keeps a
 shared memory that team leads approve or reject, and tells each person what needs their
 attention before they ask. It lives where the team already is: a real **Telegram bot**.
@@ -15,6 +15,18 @@ cites both sources and proposes a note to the author. Nothing happens until a pe
 > All data is fictional. The story follows **Brightloop**, an invented software house in Turin,
 > and its client **Alpilog**. Nothing is fetched from Gmail, Slack, Drive, GitHub or Jira: those
 > names are labels only. The only real channel is Telegram.
+
+---
+
+## Demo video
+
+[![BrightLoop demo: the control room next to Giulia's and Luca's phones](demo-video/poster.jpg)](demo-video/brightloop-demo.mp4)
+
+**[▶ Watch the demo (2:54)](demo-video/brightloop-demo.mp4)**
+
+The video runs the 9-step script of [`DEMO.md`](DEMO.md) on the real backend, with real Gemini
+and ElevenLabs calls. Telegram is shown on two simulated phones (Giulia and Luca) next to the
+control room; they show exactly what the bot would send. Waits for the model are shortened.
 
 ---
 
@@ -296,3 +308,19 @@ the same API.
 | `TASKS_*.md`, `handoff/*.md` | Task lists and work logs of the agents that built each piece. |
 | `backend/demo_script.json` | The steps behind the demo button. |
 | `backend/data/seed/` | The fictional company data and its check script. |
+| `demo-video/` | The demo video, its poster and the tools that record it (see below). |
+
+### Recording the demo video again
+
+`demo-video/stage.html` puts the control room and two phones on one 1920×1080 stage;
+`record.mjs` plays the `DEMO.md` script on it with Playwright and the installed Google Chrome,
+and `assemble.mjs` builds the MP4 with `ffmpeg` (shortened waits, message chimes, the brief's
+voice). Restart the backend and the control room first so the demo starts from the seed; the bot
+is not needed.
+
+```bash
+cd demo-video && npm install && npm run record && npm run assemble
+```
+
+The result is `demo-video/out/brightloop-demo.mp4` (not committed); the copy in the repository is
+re-encoded to keep it small.

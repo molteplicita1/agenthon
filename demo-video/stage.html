@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BrightLoop demo stage</title>
+<style>
+  :root {
+    --bg: #f5f5f7; --ink: #1d1d1f; --ink2: #6e6e73; --blue: #0071e3;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    --ease: cubic-bezier(.65, 0, .35, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  /* ---------- camera ---------- */
+  #viewport { position: absolute; inset: 0; overflow: hidden; }
+  #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; transition: transform 1.6s var(--ease); will-change: transform; }
+
+  /* ---------- labels ---------- */
+  .label { position: absolute; display: flex; align-items: baseline; gap: 10px; }
+  .label b { font-size: 21px; font-weight: 600; letter-spacing: -0.01em; }
+  .label span { font-size: 17px; color: var(--ink2); }
+
+  /* ---------- browser window ---------- */
+  #browser { position: absolute; left: 60px; top: 196px; width: 960px; height: 830px; border-radius: 14px; overflow: hidden; background: #fff;
+    box-shadow: 0 30px 80px rgba(0,0,0,.14), 0 6px 18px rgba(0,0,0,.08), 0 0 0 .5px rgba(0,0,0,.12); }
+  #browser .bar { height: 44px; background: #ececee; border-bottom: 1px solid #dcdcdf; display: flex; align-items: center; padding: 0 16px; gap: 8px; }
+  #browser .dot { width: 12px; height: 12px; border-radius: 50%; }
+  #browser .url { margin: 0 auto; width: 420px; height: 28px; border-radius: 7px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #555; transform: translateX(-30px); }
+  #browser iframe { position: absolute; left: 0; top: 44px; border: 0; transform-origin: 0 0; background: #f5f6f8; }
+
+  /* ---------- phones ---------- */
+  .phone { position: absolute; top: 196px; width: 380px; height: 830px; border-radius: 62px; background: #111;
+    padding: 11px; box-shadow: 0 30px 80px rgba(0,0,0,.18), 0 8px 20px rgba(0,0,0,.10), inset 0 0 0 2px #3a3a3c, inset 0 0 0 4px #0b0b0c; }
+  .phone::before { content: ""; position: absolute; left: -3px; top: 170px; width: 3px; height: 60px; border-radius: 2px 0 0 2px; background: #2b2b2d; box-shadow: 0 80px 0 #2b2b2d; }
+  .screen { position: relative; width: 100%; height: 100%; border-radius: 52px; overflow: hidden; display: flex; flex-direction: column; background: #fff; }
+  .island { position: absolute; top: 11px; left: 50%; width: 112px; height: 33px; margin-left: -56px; background: #000; border-radius: 20px; z-index: 5; }
+  .status { height: 52px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 36px; font-size: 16px; font-weight: 600; background: rgba(247,247,247,.94); }
+  .status .icons { display: flex; gap: 6px; align-items: center; }
+  .tg-head { flex: none; height: 54px; display: flex; align-items: center; padding: 0 12px; background: rgba(247,247,247,.94); border-bottom: .5px solid #c8c7cc; }
+  .tg-back { color: #037ee5; font-size: 17px; display: flex; align-items: center; gap: 2px; width: 86px; }
+  .tg-title { flex: 1; text-align: center; line-height: 1.15; }
+  .tg-title b { display: block; font-size: 16.5px; font-weight: 600; }
+  .tg-title span { font-size: 13px; color: #8e8e93; transition: color .2s; }
+  .tg-title span.typing { color: #037ee5; }
+  .tg-avatar { width: 36px; height: 36px; border-radius: 50%; margin-left: 50px; background: linear-gradient(160deg, #5ac8fa, #0071e3); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 16px; }
+  .chat { flex: 1; overflow: hidden; position: relative;
+    background: radial-gradient(circle at 20% 15%, #e3ecc9 0, transparent 45%), radial-gradient(circle at 85% 40%, #c9e0b8 0, transparent 50%), radial-gradient(circle at 30% 85%, #d8e6be 0, transparent 50%), linear-gradient(160deg, #d4e3bd, #b9d3a6); }
+  .chat-inner { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 8px 8px; display: flex; flex-direction: column; gap: 6px; transition: transform .6s var(--ease); }
+  .daychip { align-self: center; font-size: 13px; font-weight: 600; color: #fff; background: rgba(60,90,60,.32); padding: 3px 10px; border-radius: 12px; margin-bottom: 4px; }
+  .msg { display: flex; flex-direction: column; max-width: 88%; animation: pop .45s var(--ease) both; }
+  .msg.in { align-self: flex-start; }
+  .msg.out { align-self: flex-end; }
+  @keyframes pop { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+  .bubble { position: relative; padding: 7px 11px 7px 12px; border-radius: 18px; font-size: 15px; line-height: 1.34; white-space: pre-wrap; word-wrap: break-word; box-shadow: 0 1px 1px rgba(0,0,0,.08); }
+  .in .bubble { background: #fff; border-bottom-left-radius: 6px; }
+  .out .bubble { background: #e1fec6; border-bottom-right-radius: 6px; }
+  .bubble b { font-weight: 600; }
+  .meta { float: right; margin: 6px 0 -4px 10px; font-size: 11.5px; color: #8e8e93; }
+  .out .meta { color: #49a73c; }
+  .bubble .status-word { animation: fadein .5s ease both; }
+  @keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
+  .kb { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+  .kb-row { display: flex; gap: 4px; }
+  .kb button { position: relative; overflow: hidden; flex: 1; border: 0; height: 36px; border-radius: 10px; font: 600 14.5px var(--font); color: #fff; background: rgba(45, 75, 45, .34); backdrop-filter: blur(8px); }
+  .kb.leaving .kb-row.decide { animation: collapse .45s var(--ease) forwards; }
+  @keyframes collapse { to { opacity: 0; height: 0; margin-top: -4px; } }
+  .ripple { position: absolute; width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,.7); transform: translate(-50%,-50%) scale(0); animation: ripple .6s ease-out forwards; pointer-events: none; }
+  @keyframes ripple { to { transform: translate(-50%,-50%) scale(14); opacity: 0; } }
+  .touch { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: rgba(120,120,128,.35); border: 2px solid rgba(255,255,255,.8); z-index: 20; pointer-events: none; animation: touch .7s ease-out forwards; }
+  @keyframes touch { 0% { transform: scale(.6); opacity: 0 } 25% { transform: scale(1); opacity: 1 } 100% { transform: scale(1.25); opacity: 0 } }
+
+  .voice { display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px; min-width: 230px; }
+  .voice .play { width: 40px; height: 40px; border-radius: 50%; background: #3ba5f5; display: grid; place-items: center; flex: none; }
+  .voice .wave { display: flex; align-items: center; gap: 2px; height: 26px; }
+  .voice .wave i { display: block; width: 3px; border-radius: 2px; background: #b6d9f5; }
+  .voice .wave i.on { background: #3ba5f5; }
+  .voice .dur { font-size: 12px; color: #3ba5f5; margin-top: 2px; }
+
+  .tg-input { flex: none; height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 10px; background: rgba(247,247,247,.96); border-top: .5px solid #c8c7cc; }
+  .tg-field { flex: 1; min-height: 36px; border-radius: 18px; border: .5px solid #c8c7cc; background: #fff; display: flex; align-items: center; padding: 0 14px; font-size: 16px; color: #1d1d1f; white-space: nowrap; overflow: hidden; }
+  .tg-field.empty { color: #b0b0b5; }
+  .tg-field .caret { width: 2px; height: 20px; background: #037ee5; margin-left: 1px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0 } }
+  .tg-send { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; transition: background .2s; }
+  .tg-send.ready { background: #037ee5; }
+  .home { flex: none; height: 26px; background: rgba(247,247,247,.96); display: grid; place-items: center; }
+  .home i { width: 130px; height: 5px; border-radius: 3px; background: #111; }
+  .toast { position: absolute; left: 50%; top: 120px; transform: translate(-50%, -10px); background: rgba(30,30,30,.86); color: #fff; font-size: 15px; font-weight: 500; padding: 10px 18px; border-radius: 14px; opacity: 0; transition: all .35s var(--ease); z-index: 10; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- highlight and pointer ---------- */
+  .hl { position: absolute; border-radius: 12px; border: 3px solid var(--blue); box-shadow: 0 0 0 6px rgba(0,113,227,.18), 0 10px 40px rgba(0,113,227,.25); opacity: 0; transform: scale(1.04); transition: opacity .5s ease, transform .6s var(--ease); pointer-events: none; z-index: 30; }
+  .hl.show { opacity: 1; transform: none; }
+  .hl em { position: absolute; left: -3px; bottom: calc(100% + 8px); font-style: normal; font-size: 15px; font-weight: 600; color: #fff; background: var(--blue); padding: 5px 11px; border-radius: 9px; white-space: nowrap; }
+  #pointer { position: absolute; left: 0; top: 0; width: 26px; height: 34px; z-index: 40; opacity: 0; transition: transform 1.1s var(--ease), opacity .4s; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
+  #pointer.click svg { animation: press .35s ease; }
+  @keyframes press { 50% { transform: scale(.82); } }
+  .click-ring { position: absolute; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 3px solid var(--blue); z-index: 39; pointer-events: none; animation: ring .6s ease-out forwards; }
+  @keyframes ring { from { transform: scale(.4); opacity: .9 } to { transform: scale(1.6); opacity: 0 } }
+
+  /* ---------- caption ---------- */
+  #capband { position: absolute; left: 0; right: 0; top: 0; height: 190px; background: linear-gradient(var(--bg) 70%, rgba(245,245,247,0)); z-index: 50; pointer-events: none; }
+  #caption { position: absolute; left: 0; right: 0; top: 42px; text-align: center; z-index: 51; transition: opacity .5s ease, transform .6s var(--ease); }
+  #caption.hide { opacity: 0; transform: translateY(8px); }
+  #caption h2 { font-size: 46px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; }
+  #caption p { margin-top: 10px; font-size: 23px; color: var(--ink2); letter-spacing: -0.01em; }
+  #stepno { position: absolute; left: 60px; top: 52px; z-index: 52; font-size: 15px; font-weight: 600; color: var(--ink2); letter-spacing: .06em; text-transform: uppercase; transition: opacity .5s; }
+  #checks { position: absolute; right: 60px; top: 50px; z-index: 52; display: flex; gap: 8px; transition: opacity .5s; }
+  #checks span { font-size: 14px; font-weight: 600; color: var(--blue); background: rgba(0,113,227,.08); padding: 6px 12px; border-radius: 20px; }
+
+  /* ---------- full-screen cards ---------- */
+  #card { position: absolute; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; opacity: 0; pointer-events: none; transition: opacity .9s ease, background-color .9s ease; background: #000; color: #f5f5f7; }
+  #card.show { opacity: 1; }
+  #card.light { background: #fff; color: var(--ink); }
+  #card .k { font-size: 22px; font-weight: 600; letter-spacing: .02em; color: #86868b; margin-bottom: 18px; opacity: 0; transform: translateY(16px); transition: all 1s var(--ease) .1s; }
+  #card h1 { font-size: 112px; font-weight: 700; letter-spacing: -0.045em; line-height: 1.02; max-width: 1500px; opacity: 0; transform: translateY(24px); filter: blur(8px); transition: all 1.2s var(--ease) .25s; }
+  #card p { margin-top: 28px; font-size: 32px; font-weight: 500; letter-spacing: -0.015em; color: #86868b; max-width: 1200px; line-height: 1.3; opacity: 0; transform: translateY(16px); transition: all 1.1s var(--ease) .7s; }
+  #card.show .k, #card.show h1, #card.show p { opacity: 1; transform: none; filter: none; }
+  .grad { background: linear-gradient(90deg, #2997ff, #a259ff 55%, #ff5e8a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  #card ol { list-style: none; margin-top: 44px; display: grid; grid-template-columns: repeat(2, 520px); gap: 18px 60px; text-align: left; }
+  #card li { font-size: 30px; font-weight: 600; letter-spacing: -0.015em; display: flex; gap: 18px; align-items: baseline; opacity: 0; transform: translateY(14px); transition: all .8s var(--ease); }
+  #card li.on { opacity: 1; transform: none; }
+  #card li i { font-style: normal; color: var(--blue); font-size: 22px; width: 28px; }
+</style>
+</head>
+<body>
+<div id="viewport">
+  <div id="stage">
+    <div class="label" style="left:64px; top:156px"><b>Control room</b><span>simulated company tools · not part of the product</span></div>
+    <div class="label" style="left:1076px; top:156px"><b>Giulia Ferri</b><span>Tech Lead</span></div>
+    <div class="label" style="left:1496px; top:156px"><b>Luca Moretti</b><span>Finance Manager</span></div>
+
+    <div id="browser">
+      <div class="bar"><i class="dot" style="background:#ff5f57"></i><i class="dot" style="background:#febc2e"></i><i class="dot" style="background:#28c840"></i>
+        <div class="url">localhost:5173</div></div>
+      <iframe id="dash" src="http://localhost:5173/" title="control room"></iframe>
+    </div>
+
+    <div class="phone" id="phone-giulia" style="left:1070px"></div>
+    <div class="phone" id="phone-luca" style="left:1490px"></div>
+
+    <div id="pointer"><svg width="26" height="34" viewBox="0 0 26 34"><path d="M2 2 L2 27 L8.5 21 L13 31.5 L17.5 29.6 L13.2 19.4 L22 19.4 Z" fill="#111" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></div>
+  </div>
+  <div id="capband"></div>
+  <div id="stepno"></div>
+  <div id="checks"></div>
+  <div id="caption" class="hide"><h2></h2><p></p></div>
+  <div id="card"></div>
+</div>
+
+<script>
+// ---------------------------------------------------------------- layout
+const WIN = { x: 60, y: 196 + 44, w: 960, h: 830 - 44 };
+const DASH_W = 1100;                      // CSS width the control room is rendered at
+const SCALE = WIN.w / DASH_W;
+const dash = document.getElementById('dash');
+dash.style.width = DASH_W + 'px';
+dash.style.height = (WIN.h / SCALE) + 'px';
+dash.style.transform = `scale(${SCALE})`;
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const mark = (name) => { try { window.brainMark && window.brainMark(name); } catch (e) {} };
+
+// ---------------------------------------------------------------- backend bridge (provided by the recorder)
+async function api(method, path, person, body) {
+  if (window.brainApi) return window.brainApi(method, path, person || null, body || null);
+  const r = await fetch('http://localhost:8000' + path, { method, headers: Object.assign({ 'Content-Type': 'application/json' }, person ? { 'X-User-Id': person } : {}), body: body ? JSON.stringify(body) : undefined });
+  return { status: r.status, json: await r.json().catch(() => null) };
+}
+
+// ---------------------------------------------------------------- the bot's rendering, ported 1:1 from bot/main.py
+const NAMES = { sara: 'Sara Conti', giulia: 'Giulia Ferri', marco: 'Marco Riva', luca: 'Luca Moretti' };
+const TYPE_LABELS = { email: 'Email', chat: 'Chat', doc: 'Doc', task: 'Task', pr: 'Pull request' };
+const STATUS_LABELS = { todo: 'To do', in_progress: 'In progress', done: 'Done' };
+const APPROVED = '✅ Approved', REJECTED = '❌ Rejected';
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const body = (...b) => b.filter(Boolean).join('\n\n');
+const nameOf = id => NAMES[id] || id;
+const fmtDate = d => { const x = new Date(d + 'T00:00:00'); return isNaN(x) ? String(d || '') : `${x.getDate()} ${MON[x.getMonth()]} ${x.getFullYear()}`; };
+const fmtTime = ts => { const x = new Date(ts); return isNaN(x) ? String(ts || '') : `${DAY[x.getDay()]} ${x.getDate()} ${MON[x.getMonth()]} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`; };
+const hhmm = ts => { const x = new Date(ts); return isNaN(x) ? '09:00' : `${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`; };
+const footnotes = cs => cs.map(c => `[${c.n}] ${esc(c.label)}` + (c.quote ? ` — “${esc(c.quote)}”` : '')).join('\n');
+function sourceRows(cs) { const b = cs.map(c => ({ text: `[${c.n}]`, data: `src:${c.source_id}` })); const rows = []; for (let i = 0; i < b.length; i += 5) rows.push(b.slice(i, i + 5)); return rows; }
+async function taskTitle(id, person) { const r = await api('GET', `/sources/${id}`, person); return (r.status === 200 && r.json.title) || id; }
+async function effectLine(e, person) {
+  if (e.type === 'update_task') {
+    const c = e.changes || {}, what = [];
+    if ('due_date' in c) what.push(`due date → ${fmtDate(c.due_date)}`);
+    if ('status' in c) what.push(`status → ${STATUS_LABELS[c.status] || c.status}`);
+    return `• Change task “${esc(await taskTitle(e.task_id, person))}”: ${esc(what.join(', '))}`;
+  }
+  if (e.type === 'create_task') return `• Create task “${esc(e.title)}” for ${esc(nameOf(e.assignee))}, due ${esc(fmtDate(e.due_date))}`;
+  if (e.type === 'send_message') return `• Send to ${esc(e.to.startsWith('#') ? e.to : nameOf(e.to))}: “${esc(e.text)}”`;
+  return `• ${esc(e.type)}`;
+}
+const decideRow = (k, id) => [{ text: 'Approve', data: `${k}:approve:${id}` }, { text: 'Reject', data: `${k}:reject:${id}` }];
+async function renderAlertWithCard(msg, person) {
+  const word = s => ({ approved: APPROVED, rejected: REJECTED })[s];
+  let card, status, rows = [];
+  if (msg.actions && msg.actions.length) {
+    const a = msg.actions[0];
+    const effects = (await Promise.all((a.effects || []).map(e => effectLine(e, person)))).join('\n');
+    card = body(`<b>Proposed: ${esc(a.title)}</b>`, effects ? `If you approve:\n${effects}` : '');
+    status = word(a.status);
+    if (a.status === 'pending') rows.push(decideRow('act', a.id));
+  } else {
+    const m = msg.memory_items[0];
+    card = `<b>Remember:</b> ${esc(m.statement)}`;
+    status = word(m.status);
+    if (m.status === 'proposed' && m.can_decide) rows.push(decideRow('mem', m.id));
+  }
+  return [{ html: body('<b>Alert</b>', esc(msg.text), card, footnotes(msg.citations), status), rows: rows.concat(sourceRows(msg.citations)) }];
+}
+async function render(msg, person) {
+  if (msg.kind === 'alert' && (msg.actions || []).length + (msg.memory_items || []).length === 1) return renderAlertWithCard(msg, person);
+  const header = { brief: '<b>Morning brief</b>', alert: '<b>Alert</b>' }[msg.kind];
+  return [{ html: body(header, esc(msg.text), footnotes(msg.citations)), rows: sourceRows(msg.citations) }];
+}
+function renderSource(src) {
+  let meta = `${esc(src.author)} · ${esc(fmtTime(src.timestamp))}`;
+  if (src.type === 'task') { const bits = []; if (src.assignee) bits.push(`Assignee: ${nameOf(src.assignee)}`); if (src.due_date) bits.push(`Due ${fmtDate(src.due_date)}`); if (src.status) bits.push(STATUS_LABELS[src.status] || src.status); meta += '\n' + esc(bits.join(' · ')); }
+  return body(`<b>${esc(TYPE_LABELS[src.type] || src.type)}</b> · ${esc(src.title)}`, meta, esc(src.body));
+}
+
+// ---------------------------------------------------------------- a phone running the Telegram chat with the bot
+const ICON_SIGNAL = '<svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>';
+const ICON_WIFI = '<svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0zM3.5 6.9a6.4 6.4 0 0 1 9 0l-1.4 1.4a4.4 4.4 0 0 0-6.2 0zM1.2 4.6a9.6 9.6 0 0 1 13.6 0l-1.4 1.4a7.6 7.6 0 0 0-10.8 0z"/></svg>';
+const ICON_BATT = '<svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="#1d1d1f" opacity=".4"/><rect x="2" y="2" width="18" height="9" rx="2"/><rect x="24.5" y="4.5" width="1.6" height="4" rx=".8" opacity=".4"/></svg>';
+const ICON_CLIP = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.8" stroke-linecap="round"><path d="M20 11.5 12.3 19.2a5 5 0 0 1-7.1-7.1l8-8a3.3 3.3 0 0 1 4.7 4.7l-8 8a1.7 1.7 0 0 1-2.4-2.4l7.4-7.3"/></svg>';
+const ICON_MIC = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>';
+const ICON_SEND = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>';
+const ICON_PLAY = '<svg width="16" height="18" viewBox="0 0 16 18"><path d="M2 1.5v15L15 9z" fill="#fff"/></svg>';
+const ICON_PAUSE = '<svg width="14" height="16" viewBox="0 0 14 16"><rect x="1" y="1" width="4" height="14" rx="1" fill="#fff"/><rect x="9" y="1" width="4" height="14" rx="1" fill="#fff"/></svg>';
+
+class Phone {
+  constructor(person) {
+    this.person = person; this.seen = null; this.incoming = 0; this.now = '2026-11-24T09:00:00'; this.bubbles = {}; this.busy = Promise.resolve();
+    const el = document.getElementById('phone-' + person);
+    el.innerHTML = `<div class="screen"><div class="island"></div>
+      <div class="status"><span>9:41</span><span class="icons">${ICON_SIGNAL}${ICON_WIFI}${ICON_BATT}</span></div>
+      <div class="tg-head"><div class="tg-back"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2 2 10l8 8" fill="none" stroke="#037ee5" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>&nbsp;Chats</div>
+        <div class="tg-title"><b>BrightLoop</b><span>bot</span></div><div class="tg-avatar">B</div></div>
+      <div class="chat"><div class="chat-inner"><div class="daychip">Today</div></div></div>
+      <div class="tg-input">${ICON_CLIP}<div class="tg-field empty">Message</div><div class="tg-send">${ICON_MIC}</div></div>
+      <div class="home"><i></i></div><div class="toast"></div></div>`;
+    this.el = el;
+    this.inner = el.querySelector('.chat-inner');
+    this.chat = el.querySelector('.chat');
+    this.sub = el.querySelector('.tg-title span');
+    this.field = el.querySelector('.tg-field');
+    this.send = el.querySelector('.tg-send');
+    this.toastEl = el.querySelector('.toast');
+    this.status = el.querySelector('.status span');
+  }
+  scroll(wrap) {
+    // The column is bottom-anchored, so the newest message is always in view. A message taller than
+    // the screen first shows its top, then the chat glides down to its end, as a reader would scroll.
+    clearTimeout(this.panTimer);
+    this.inner.style.transition = 'none';
+    this.inner.style.transform = 'none';
+    const extra = wrap ? wrap.offsetHeight - this.chat.clientHeight + 20 : 0;
+    if (extra <= 0) return;
+    this.inner.style.transform = `translateY(${extra}px)`;
+    void this.inner.offsetWidth;
+    this.panTimer = setTimeout(() => {
+      this.inner.style.transition = `transform ${Math.min(4.5, 1.2 + extra / 120)}s var(--ease)`;
+      this.inner.style.transform = 'none';
+    }, 3600);
+  }
+  add(side, html, rows, time) {
+    const wrap = document.createElement('div');
+    wrap.className = 'msg ' + side;
+    const meta = side === 'out' ? `${time} <span>✓✓</span>` : time;
+    wrap.innerHTML = `<div class="bubble"><span class="txt">${html}</span><span class="meta">${meta}</span></div>`;
+    if (rows && rows.length) {
+      const kb = document.createElement('div'); kb.className = 'kb';
+      for (const row of rows) {
+        const r = document.createElement('div'); r.className = 'kb-row' + (row.some(b => /^(act|mem):/.test(b.data)) ? ' decide' : '');
+        for (const b of row) { const btn = document.createElement('button'); btn.textContent = b.text; btn.dataset.cb = b.data; r.appendChild(btn); }
+        kb.appendChild(r);
+      }
+      wrap.appendChild(kb);
+    }
+    this.inner.appendChild(wrap);
+    this.scroll(side === 'in' ? wrap : null);
+    return wrap;
+  }
+  async poll() {
+    const r = await api('GET', '/state', this.person);
+    if (r.status !== 200) return;
+    this.now = r.json.now;
+    const brain = r.json.thread.filter(m => m.from === 'brain' && (m.kind === 'brief' || m.kind === 'alert'));
+    if (this.seen === null) { this.seen = new Set(brain.map(m => m.id)); return; }   // like a freshly tied chat
+    for (const m of brain) {
+      if (this.seen.has(m.id)) continue;
+      this.seen.add(m.id);
+      for (const part of await render(m, this.person)) this.add('in', part.html, part.rows, hhmm(m.created_at));
+      mark('msg:' + this.person);
+      if (m.kind === 'brief') await this.addVoice(m.created_at);
+      this.incoming++;
+    }
+  }
+  async addVoice(ts) {
+    let dur = 5;
+    try {
+      const b64 = await window.brainAudio(this.person);
+      if (b64) { const a = new Audio('data:audio/mpeg;base64,' + b64); await new Promise(res => { a.onloadedmetadata = res; a.onerror = res; setTimeout(res, 1500); }); if (isFinite(a.duration) && a.duration > 0) dur = a.duration; }
+    } catch (e) {}
+    await sleep(900);
+    const bars = Array.from({ length: 34 }, (_, i) => `<i style="height:${6 + Math.round(18 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * .45)))}px"></i>`).join('');
+    const w = this.add('in', '', null, hhmm(ts));
+    const bub = w.querySelector('.bubble'); bub.classList.add('voice');
+    bub.innerHTML = `<div class="play">${ICON_PLAY}</div><div><div class="wave">${bars}</div><div class="dur">0:${String(Math.round(dur)).padStart(2, '0')}</div></div><span class="meta" style="align-self:flex-end">${hhmm(ts)}</span>`;
+    this.voice = { el: bub, dur };
+    mark('msg:' + this.person);
+  }
+  async playVoice() {
+    const v = this.voice; if (!v) return 0;
+    const play = v.el.querySelector('.play'); this.touch(play);
+    await sleep(250);
+    play.innerHTML = ICON_PAUSE; mark('voice:' + this.person);
+    const bars = [...v.el.querySelectorAll('.wave i')], t0 = performance.now(), d = v.dur * 1000;
+    await new Promise(res => { const tick = () => { const p = Math.min(1, (performance.now() - t0) / d); bars.forEach((b, i) => b.classList.toggle('on', i / bars.length < p)); v.el.querySelector('.dur').textContent = '0:' + String(Math.round(v.dur * (1 - p))).padStart(2, '0'); p < 1 ? requestAnimationFrame(tick) : res(); }; tick(); });
+    play.innerHTML = ICON_PLAY;
+    return v.dur;
+  }
+  touch(target) {
+    const r = target.getBoundingClientRect(), s = this.el.getBoundingClientRect(), k = s.width / this.el.offsetWidth;
+    const t = document.createElement('div'); t.className = 'touch';
+    t.style.left = ((r.left + r.width / 2 - s.left) / k) + 'px'; t.style.top = ((r.top + r.height / 2 - s.top) / k) + 'px';
+    this.el.appendChild(t); setTimeout(() => t.remove(), 800);
+    if (target.tagName === 'BUTTON') { const rp = document.createElement('span'); rp.className = 'ripple'; rp.style.left = '50%'; rp.style.top = '50%'; target.appendChild(rp); setTimeout(() => rp.remove(), 700); }
+  }
+  toast(text) { this.toastEl.textContent = text; this.toastEl.classList.add('show'); setTimeout(() => this.toastEl.classList.remove('show'), 1800); }
+  lastButton(label) { const all = [...this.inner.querySelectorAll('.kb button')].filter(b => b.textContent === label); return all[all.length - 1]; }
+  async tap(label) {
+    const btn = this.lastButton(label); if (!btn) throw new Error(`${this.person}: no button ${label}`);
+    this.touch(btn); await sleep(350);
+    const data = btn.dataset.cb;
+    if (data.startsWith('src:')) {
+      const r = await api('GET', `/sources/${data.slice(4)}`, this.person);
+      await sleep(400);
+      this.add('in', r.status === 200 ? renderSource(r.json) : "You don't have access to this source.", null, hhmm(this.now));
+      mark('msg:' + this.person);
+      return;
+    }
+    const [kind, verb, id] = data.split(':');
+    const r = await api('POST', `/${kind === 'act' ? 'actions' : 'memory'}/${id}/${verb}`, this.person);
+    if (r.status !== 200) { this.toast((r.json && r.json.detail) || 'Error'); return; }
+    const word = verb === 'approve' ? APPROVED : REJECTED;
+    const wrap = btn.closest('.msg');
+    wrap.querySelector('.txt').insertAdjacentHTML('beforeend', `<span class="status-word">\n\n${word}</span>`);
+    const kb = wrap.querySelector('.kb'); kb.classList.add('leaving');
+    setTimeout(() => { const row = kb.querySelector('.kb-row.decide'); row && row.remove(); if (!kb.children.length) kb.remove(); }, 460);
+    this.toast(word);
+  }
+  async ask(text) {
+    this.field.classList.remove('empty'); this.field.textContent = '';
+    const caret = document.createElement('i'); caret.className = 'caret';
+    this.send.classList.add('ready'); this.send.innerHTML = ICON_SEND;
+    for (let i = 1; i <= text.length; i++) { this.field.textContent = text.slice(0, i); this.field.appendChild(caret); await sleep(34 + Math.random() * 30); }
+    await sleep(450);
+    this.touch(this.send);
+    this.add('out', esc(text), null, hhmm(this.now));
+    this.field.textContent = 'Message'; this.field.classList.add('empty');
+    this.send.classList.remove('ready'); this.send.innerHTML = ICON_MIC;
+    await sleep(500);
+    this.sub.textContent = 'typing…'; this.sub.classList.add('typing');
+    mark('wait-start');
+    const r = await api('POST', '/ask', this.person, { question: text });
+    mark('wait-end');
+    await sleep(700);
+    this.sub.textContent = 'bot'; this.sub.classList.remove('typing');
+    if (r.status !== 200) { this.add('in', esc((r.json && r.json.detail) || 'Error'), null, hhmm(this.now)); return; }
+    for (const part of await render(r.json, this.person)) this.add('in', part.html, part.rows, hhmm(r.json.created_at));
+    mark('msg:' + this.person);
+  }
+}
+
+// ---------------------------------------------------------------- direction: camera, captions, cards, pointer, highlights
+const stageEl = document.getElementById('stage');
+let cam = { cx: 960, cy: 540, s: 1 };
+const SHOTS = {
+  all:    { cx: 960,  cy: 560, s: 1 },
+  phones: { cx: 1470, cy: 611, s: 1.09 },
+  giulia: { cx: 1260, cy: 611, s: 1.1 },
+  luca:   { cx: 1680, cy: 611, s: 1.1 },
+  dash:   { cx: 545,  cy: 610, s: 1.12 },
+};
+function camera(shot, ms = 1600) {
+  cam = typeof shot === 'string' ? SHOTS[shot] : shot;
+  stageEl.style.transition = `transform ${ms}ms var(--ease)`;
+  const tx = 960 - cam.cx * cam.s, ty = 612 - cam.cy * cam.s;
+  stageEl.style.transform = `translate(${tx}px, ${ty}px) scale(${cam.s})`;
+}
+// a point inside the control room (iframe CSS px) → stage coordinates
+const dashToStage = (x, y) => ({ x: WIN.x + x * SCALE, y: WIN.y + y * SCALE });
+
+async function caption(h, p) {
+  const c = document.getElementById('caption');
+  if (!c.classList.contains('hide')) { c.classList.add('hide'); await sleep(450); }
+  if (!h) return;
+  c.querySelector('h2').innerHTML = h; c.querySelector('p').innerHTML = p || '';
+  c.classList.remove('hide');
+}
+function step(n, checks) {
+  document.getElementById('stepno').textContent = n ? `Step ${n} of 9` : '';
+  document.getElementById('checks').innerHTML = (checks || []).map(c => `<span>${c}</span>`).join('');
+}
+async function card(opts) {
+  const el = document.getElementById('card');
+  if (!opts) { el.classList.remove('show'); await sleep(900); return; }
+  el.classList.remove('show'); await sleep(opts.instant ? 0 : 50);
+  el.className = opts.light ? 'light' : '';
+  el.innerHTML = (opts.k ? `<div class="k">${opts.k}</div>` : '') + `<h1>${opts.h}</h1>` + (opts.p ? `<p>${opts.p}</p>` : '') + (opts.list ? `<ol>${opts.list.map(t => `<li><i>✓</i>${t}</li>`).join('')}</ol>` : '');
+  void el.offsetWidth; el.classList.add('show');
+}
+async function revealList(gap = 380) { for (const li of document.querySelectorAll('#card li')) { li.classList.add('on'); await sleep(gap); } }
+
+const pointer = document.getElementById('pointer');
+async function pointTo(x, y, ms = 1100) { pointer.style.transition = `transform ${ms}ms var(--ease), opacity .4s`; pointer.style.opacity = 1; pointer.style.transform = `translate(${x - 3}px, ${y - 2}px)`; await sleep(ms); }
+async function clickAt(x, y) {
+  pointer.classList.remove('click'); void pointer.offsetWidth; pointer.classList.add('click');
+  const r = document.createElement('div'); r.className = 'click-ring'; r.style.left = x + 'px'; r.style.top = y + 'px'; stageEl.appendChild(r); setTimeout(() => r.remove(), 700);
+}
+function hidePointer() { pointer.style.opacity = 0; }
+
+const hls = [];
+function highlight(rect, label) {   // rect in control-room CSS px
+  const a = dashToStage(rect.x, rect.y), pad = 6;
+  const el = document.createElement('div'); el.className = 'hl';
+  Object.assign(el.style, { left: (a.x - pad) + 'px', top: (a.y - pad) + 'px', width: (rect.w * SCALE + 2 * pad) + 'px', height: (rect.h * SCALE + 2 * pad) + 'px' });
+  if (label) el.innerHTML = `<em>${label}</em>`;
+  stageEl.appendChild(el); void el.offsetWidth; el.classList.add('show'); hls.push(el);
+}
+function clearHighlights() { while (hls.length) { const el = hls.pop(); el.classList.remove('show'); setTimeout(() => el.remove(), 600); } }
+
+const phones = { giulia: new Phone('giulia'), luca: new Phone('luca') };
+async function pollLoop() { while (true) { for (const p of Object.values(phones)) { try { await p.poll(); } catch (e) { console.error(e); } } await sleep(700); } }
+
+window.stage = { phones, camera, caption, step, card, revealList, pointTo, clickAt, hidePointer, highlight, clearHighlights, dashToStage, SCALE, start: () => { pollLoop(); } };
+</script>
+</body>
+</html>
