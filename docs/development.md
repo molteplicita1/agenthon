@@ -93,11 +93,17 @@ Type-checks the control room with `tsc` and builds it into `frontend/dist/`.
 `demo-video/stage.html` puts the control room and two simulated phones (Giulia and Luca) on one
 1920×1080 stage. `record.mjs` plays the demo script on it with Playwright and the installed
 Google Chrome against the real backend; `assemble.mjs` builds the MP4 with `ffmpeg` (shortened
-waits, message chimes, the brief's voice). Restart the backend and the control room first so the
-demo starts from the seed; the bot is not needed.
+waits, message chimes, the brief's voice, the narrator and background music that ducks under the
+voices, normalised to -16 LUFS). Restart the backend and the control room first so the demo starts
+from the seed; the bot is not needed.
+
+The narrator's lines are in `narration.json`. `narrate.mjs` turns them into speech with
+ElevenLabs (the key in `.env`), caching each clip by its text, and `record.mjs` holds every scene
+until its line has been spoken. `music.py` composes the music from code (needs `numpy` and
+`scipy`), so there is no licence to clear.
 
 ```bash
-cd demo-video && npm install && npm run record && npm run assemble
+cd demo-video && npm install && npm run narrate && npm run record && npm run assemble
 ```
 
 The result is `demo-video/out/brightloop-demo.mp4` (ignored by Git); the committed

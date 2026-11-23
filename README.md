@@ -24,12 +24,13 @@ cites both sources and proposes a note to the author. Nothing happens until a pe
 
 [![BrightLoop demo: the control room next to Giulia's and Luca's phones](demo-video/poster.jpg)](demo-video/brightloop-demo.mp4)
 
-**[▶ Watch the demo (2:54)](demo-video/brightloop-demo.mp4)**
+**[▶ Watch the demo (4:13)](demo-video/brightloop-demo.mp4)**
 
 The video runs the 9-step script of [`demo-video/demo.md`](demo-video/demo.md) on the real
 backend, with real Gemini and ElevenLabs calls. Telegram is shown on two simulated phones (Giulia
 and Luca) next to the control room; they show exactly what the bot would send. Waits for the
-model are shortened. The spoken pitch is in [`demo-video/pitch.md`](demo-video/pitch.md).
+model are shortened. A narrator explains each step over light background music. The spoken pitch
+is in [`demo-video/pitch.md`](demo-video/pitch.md).
 
 ---
 
